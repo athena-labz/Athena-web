@@ -38,7 +38,7 @@ export function Connector({ whitelistedWallets }: ConnectorProps) {
     <div>
       <button
         onClick={() => setWalletSelectorShow(true)}
-        className="bg-blue-500 hover:opacity-75 text-normal md:text-lg text-white font-bold py-2 px-4 rounded"
+        className="border-blue-500 border-2 hover:opacity-75 text-normal md:text-lg text-blue-500 font-bold py-2 px-4 rounded-full"
       >
         {statusDisplay}
       </button>

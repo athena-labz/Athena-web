@@ -12,12 +12,12 @@ const Header = ({}: HeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <header className="bg-dark-main border-b-2 border-[#A7ADB41A] text-white text-sm p-4 flex justify-between items-center">
+    <header className="fixed top-0 h-20 p-4 w-full z-10 text-white text-sm flex justify-between items-center">
       <div className="flex items-center">
         {/* Content for the left field */}
         <img
-          className="h-8 md:h-16 hover:cursor-pointer"
-          src="assets/logo.png"
+          className="h-8 md:h-12 hover:cursor-pointer"
+          src="/assets/logo.png"
           onClick={() => navigate("/")}
         />
       </div>
