@@ -2,27 +2,14 @@ import React, { useEffect, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import gravatar from "gravatar";
-
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
+import { Avatar } from "../components/User";
+import { FundingContainer } from "../components/FundingContainer";
 
 import { CurrentSideBarSelection } from "../components/Sidebar";
 
-type AvatarProps = {
-  email: string;
-  size?: number;
-  className?: string;
-};
-
-const Avatar = ({ email, size, className }: AvatarProps) => {
-  const avatarURL = gravatar.url(email, {
-    s: size?.toString() || "200",
-    d: "identicon",
-  });
-
-  return <img className={className ?? ""} src={avatarURL} alt="Avatar" />;
-};
+import { submissionHistorySample, fundingHistorySample } from "../assets/samples";
 
 const UserCard = () => {
   return (
@@ -63,6 +50,86 @@ const ProjectCard = () => {
       <div className="flex flex-row text-sm text-slate-400 justify-between items-center">
         <span>Awaiting Approval</span>
         <span>Jun 2, 2023</span>
+      </div>
+    </div>
+  );
+};
+
+const addNumberSeparator = (number: string, separator: string): string => {
+  const digits = [];
+
+  for (let i = number.length - 1; i >= 0; i--) {
+    const digit = number[i];
+    digits.unshift(digit);
+
+    if ((number.length - i) % 3 === 0 && i !== 0) {
+      digits.unshift(separator);
+    }
+  }
+
+  return digits.join("");
+};
+
+const SpecificTaskPage = () => {
+  const TaskContent = () => (
+    <div className="flex h-full items-start col-span-2">
+      <div className="flex flex-col gap-4 bg-white rounded-lg p-8">
+        <h1 className="text-3xl text-slate-600 font-semibold">Task Name</h1>
+        <hr />
+        <h1 className="text-2xl text-slate-600 font-semibold">
+          About this task
+        </h1>
+        <span className="text-justify">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+          dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget
+          porta mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus
+          metus. Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet
+          lacinia tristique, ex tortor porttitor augue, eu ultricies nulla nibh
+          sed mi. Pellentesque lobortis pellentesque nisl, a semper elit
+          facilisis congue. Nulla mattis fermentum massa, vitae interdum lorem
+          accumsan sit amet. Maecenas tempus nisl eget felis vehicula, quis
+          fermentum mi cursus.
+        </span>
+        <hr />
+        <div className="flex flex-row justify-between items-center">
+          <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
+            <span>Created by</span>
+            <div className="flex flex-row justify-start items-center gap-1 hover:text-slate-600 hover:cursor-pointer">
+              <Avatar email="alice@email.com" className="w-4 rounded-full" />
+              <span className="">alice_theone</span>
+            </div>
+          </div>
+          <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
+            <span>Jan 3, 2023</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="p-8 inline-block">
+      <div className="flex flex-wrap md:grid md:grid-cols-3 gap-4">
+        <TaskContent />
+
+        {/* fundingState:
+    | "AvailableCreator"
+    | "AvailableFunder"
+    | "ProgressCreator"
+    | "ProgressFunder"
+    | "ReviewAdmin"
+    | "ReviewUser"
+    | "Approved"
+    | "Rejected"; */}
+
+        <div className="flex h-full items-start">
+          <FundingContainer
+            fundingState="Rejected"
+            submissionHistory={submissionHistorySample}
+            totalFundingAmount={BigInt(435_123_456)}
+            fundingHistory={fundingHistorySample}
+          />
+        </div>
       </div>
     </div>
   );
@@ -113,21 +180,24 @@ const UsersPage = () => {
 
 const OrganizationPage = () => {
   const [currentSelection, setCurrentSelection] =
-    useState<CurrentSideBarSelection>("Tasks");
+    useState<CurrentSideBarSelection>("SpecificTask");
 
   return (
     <div className="bg-slate-100 h-screen w-full">
-      <div className="">
+      <Header border />
+      <div className="mt-20">
         <Sidebar
           currentSelection={currentSelection}
           setCurrentSelection={setCurrentSelection}
         />
-        <div className="fixed left-80 overflow-auto h-screen w-full pr-64">
+        <div className="fixed ml-80 pr-80 overflow-auto h-screen w-full">
           {/* Your main page content */}
 
           {currentSelection === "Tasks" && <TasksPage />}
 
           {currentSelection === "Users" && <UsersPage />}
+
+          {currentSelection === "SpecificTask" && <SpecificTaskPage />}
 
           {/* {currentSelection === "Profile" && <ProfilePage />} */}
         </div>

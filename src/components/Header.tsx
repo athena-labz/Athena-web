@@ -6,13 +6,19 @@ import { Connector } from "./Connector";
 
 const whitelistedWallets = ["eternl", "nami"];
 
-type HeaderProps = {};
+type HeaderProps = {
+  border?: boolean;
+};
 
-const Header = ({}: HeaderProps) => {
+const Header = ({ border = false }: HeaderProps) => {
   const navigate = useNavigate();
 
   return (
-    <header className="fixed top-0 h-20 p-4 w-full z-10 text-white text-sm flex justify-between items-center">
+    <header
+      className={`fixed ${
+        border ? "border-b-2 border-b-slate-200" : ""
+      } top-0 h-20 p-4 w-full z-10 text-white text-sm flex justify-between items-center`}
+    >
       <div className="flex items-center">
         {/* Content for the left field */}
         <img

@@ -2,7 +2,12 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-export type CurrentSideBarSelection = "Tasks" | "Users" | "Profile";
+export type CurrentSideBarSelection =
+  | "Tasks"
+  | "Users"
+  | "Profile"
+  | "SpecificTask"
+  | "SpecificUser";
 
 type SidebarSelectionContainerProps = {
   title: string;
@@ -71,7 +76,7 @@ const Sidebar = ({ currentSelection, setCurrentSelection }: SidebarProps) => {
   return (
     <div>
       {showSidebar && (
-        <div className="fixed top-0 left-0 h-screen w-80 bg-white overflow-auto">
+        <div className="fixed top-20 left-0 h-screen w-80 bg-white overflow-auto">
           <ul className="flex flex-col p-4">
             <div className="flex p-2 mb-4">
               <span className="text-2xl text-dark-blue font-extrabold">
