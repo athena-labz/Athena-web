@@ -1,5 +1,3 @@
-import { FundingEvent, SubmissionEvent } from "../components/FundingContainer";
-
 export const submissionHistorySample: SubmissionEvent[] = [
   {
     title: "First attempt",
@@ -39,45 +37,89 @@ export const submissionHistorySample: SubmissionEvent[] = [
   },
 ];
 
-export const fundingHistorySample: FundingEvent[] = [
+export const taskListSample = [
   {
-    username: "alice_theone",
-    email: "alice@email.com",
-    amount: BigInt(10_000_000),
+    projectId: "de1c0125-e1e4-4442-a132-57ba9b1e1b64",
+    name: "Project 1",
+    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse 
+    dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
+    mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
+    Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
+    tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
+    Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
+    Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
+    Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.`,
+    status: "Progress",
+    date: "Jun 2, 2023",
   },
   {
-    username: "bobTheBuilder",
-    email: "bob@email.com",
-    amount: BigInt(25_000_000),
+    projectId: "de1c0125-e1e4-4442-a132-57ba9b1e1b64",
+    name: "Project 1",
+    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse 
+    dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
+    mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
+    Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
+    tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
+    Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
+    Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
+    Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.`,
+    status: "Progress",
+    date: "Jun 2, 2023",
   },
   {
-    username: "barneyWas_right",
-    email: "barney@email.com",
-    amount: BigInt(7_512_345),
+    projectId: "de1c0125-e1e4-4442-a132-57ba9b1e1b64",
+    name: "Project 1",
+    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse 
+    dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
+    mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
+    Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
+    tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
+    Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
+    Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
+    Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.`,
+    status: "Progress",
+    date: "Jun 2, 2023",
   },
   {
-    username: "then_therewasNone",
-    email: "agatha@email.com",
-    amount: BigInt(10_000_000),
-  },
-  {
-    username: "then_therewasNone",
-    email: "agatha@email.com",
-    amount: BigInt(10_000_000),
-  },
-  {
-    username: "then_therewasNone",
-    email: "agatha@email.com",
-    amount: BigInt(10_000_000),
-  },
-  {
-    username: "then_therewasNone",
-    email: "agatha@email.com",
-    amount: BigInt(10_000_000),
-  },
-  {
-    username: "then_therewasNone",
-    email: "agatha@email.com",
-    amount: BigInt(10_000_000),
+    projectId: "de1c0125-e1e4-4442-a132-57ba9b1e1b64",
+    name: "Project 1",
+    description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse 
+    dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
+    mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
+    Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
+    tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
+    Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
+    Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
+    Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.`,
+    status: "Progress",
+    date: "Jun 2, 2023",
   },
 ];
+
+export const taskContentSample = {
+  name: "Task Name",
+  taskStatus: "Progress",
+  description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+  dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
+  mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
+  Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
+  tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
+  Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
+  Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
+  Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.`,
+  date: "Jan 3, 2023",
+  submissionHistory: submissionHistorySample,
+  userAssigned: {
+    username: "alice_theone",
+    email: "alice@email.com",
+  },
+};
+
+export const userDataSample = {
+  username: "alice_theone",
+  name: "Alice Bjourne",
+  email: "alice@email.com",
+  role: "coach",
+  stakeAddress:
+    "stake_test1upmpu3pjqgjx4amy8ulv4fxpy26cmh553yhxhjhqurz9y7qrymfne",
+};

@@ -1,11 +1,11 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export type CurrentSideBarSelection =
-  | "Tasks"
-  | "Users"
-  | "Profile"
+  | "tasks"
+  | "users"
+  | "profile"
   | "SpecificTask"
   | "SpecificUser";
 
@@ -44,15 +44,21 @@ const SidebarSelectionContainer = ({
   );
 };
 
-type SidebarProps = {
-  currentSelection: CurrentSideBarSelection;
-  setCurrentSelection: (currentSelection: CurrentSideBarSelection) => void;
+type Params = {
+  organization: string;
 };
 
-const Sidebar = ({ currentSelection, setCurrentSelection }: SidebarProps) => {
+type SidebarProps = {
+  currentSelection: CurrentSideBarSelection;
+};
+
+const Sidebar = ({ currentSelection }: SidebarProps) => {
   const [showSidebar, setShowSidebar] = useState(true);
 
+  const { organization } = useParams<Params>();
   const navigate = useNavigate();
+
+  const username = "aliceIsSmart";
 
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
@@ -89,22 +95,24 @@ const Sidebar = ({ currentSelection, setCurrentSelection }: SidebarProps) => {
             <SidebarSelectionContainer
               title="Tasks"
               iconName="task"
-              selected={currentSelection == "Tasks"}
-              onSelect={() => setCurrentSelection("Tasks")}
+              selected={currentSelection === "tasks"}
+              onSelect={() => navigate(`/organization/${organization}/tasks`)}
             />
 
             <SidebarSelectionContainer
               title="Users"
               iconName="group"
-              selected={currentSelection == "Users"}
-              onSelect={() => setCurrentSelection("Users")}
+              selected={currentSelection === "users"}
+              onSelect={() => navigate(`/organization/${organization}/users`)}
             />
 
             <SidebarSelectionContainer
               title="Profile"
               iconName="person"
-              selected={currentSelection == "Profile"}
-              onSelect={() => setCurrentSelection("Profile")}
+              selected={currentSelection === "profile"}
+              onSelect={() =>
+                navigate(`/organization/${organization}/users/${username}`)
+              }
             />
 
             <div className="flex justify-end">

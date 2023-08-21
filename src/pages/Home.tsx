@@ -31,7 +31,7 @@ const Home = () => {
               </button>
               <button
                 className="bg-dark-blue py-4 w-72 rounded-lg text-white text-2xl font-bold"
-                onClick={() => navigate("/create-organization")}
+                onClick={() => navigate("/organization/create")}
               >
                 Create organization
               </button>

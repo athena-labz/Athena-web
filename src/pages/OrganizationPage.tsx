@@ -1,205 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import { Avatar } from "../components/User";
-import { FundingContainer } from "../components/FundingContainer";
+
+import UsersPage from "./UsersPage";
+import SpecificTaskPage from "./SpecficTaskPage";
 
 import { CurrentSideBarSelection } from "../components/Sidebar";
 
-import { submissionHistorySample, fundingHistorySample } from "../assets/samples";
-
-const UserCard = () => {
-  return (
-    <div className="inline-block text-slate-600 gap-4 w-72 p-8 bg-white rounded-lg hover:cursor-pointer">
-      <div className="flex flex-row justify-start items-center gap-2">
-        <Avatar email="alice@email.com" className="w-8 rounded-full" />
-        <span className="text-lg font-semibold">alice_theone</span>
-      </div>
-      <div className="flex flex-col gap-2 mt-4 mb-4">
-        <span className="truncate">alice@email.com</span>
-        <span className="truncate">
-          stake_test1upmpu3pjqgjx4amy8ulv4fxpy26cmh553yhxhjhqurz9y7qrymfne
-        </span>
-      </div>
-      <div className="inline-block w-full">
-        <hr className="mb-2" />
-        <span className="text-slate-400">3 projects completed</span>
-      </div>
-    </div>
-  );
+type OrganizationPageProps = {
+  currentSelection: "tasks" | "users" | "profile";
+  children: ReactNode;
 };
 
-const ProjectCard = () => {
-  return (
-    <div className="flex flex-col text-slate-600 gap-2 w-72 p-8 bg-white rounded-lg hover:cursor-pointer">
-      <span className="text-lg font-semibold">Project 1</span>
-      <span className="text-justify line-clamp-3">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-        dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget porta
-        mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus metus.
-        Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet lacinia
-        tristique, ex tortor porttitor augue, eu ultricies nulla nibh sed mi.
-        Pellentesque lobortis pellentesque nisl, a semper elit facilisis congue.
-        Nulla mattis fermentum massa, vitae interdum lorem accumsan sit amet.
-        Maecenas tempus nisl eget felis vehicula, quis fermentum mi cursus.
-      </span>
-      <hr className="mt-2" />
-      <div className="flex flex-row text-sm text-slate-400 justify-between items-center">
-        <span>Awaiting Approval</span>
-        <span>Jun 2, 2023</span>
-      </div>
-    </div>
-  );
-};
-
-const addNumberSeparator = (number: string, separator: string): string => {
-  const digits = [];
-
-  for (let i = number.length - 1; i >= 0; i--) {
-    const digit = number[i];
-    digits.unshift(digit);
-
-    if ((number.length - i) % 3 === 0 && i !== 0) {
-      digits.unshift(separator);
-    }
-  }
-
-  return digits.join("");
-};
-
-const SpecificTaskPage = () => {
-  const TaskContent = () => (
-    <div className="flex h-full items-start col-span-2">
-      <div className="flex flex-col gap-4 bg-white rounded-lg p-8">
-        <h1 className="text-3xl text-slate-600 font-semibold">Task Name</h1>
-        <hr />
-        <h1 className="text-2xl text-slate-600 font-semibold">
-          About this task
-        </h1>
-        <span className="text-justify">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-          dapibus lacinia est eu hendrerit. Etiam quis fringilla velit, eget
-          porta mauris. Quisque sit amet leo dictum, lacinia nisi quis, finibus
-          metus. Nulla eget consectetur dolor. Mauris fringilla, nisl sit amet
-          lacinia tristique, ex tortor porttitor augue, eu ultricies nulla nibh
-          sed mi. Pellentesque lobortis pellentesque nisl, a semper elit
-          facilisis congue. Nulla mattis fermentum massa, vitae interdum lorem
-          accumsan sit amet. Maecenas tempus nisl eget felis vehicula, quis
-          fermentum mi cursus.
-        </span>
-        <hr />
-        <div className="flex flex-row justify-between items-center">
-          <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
-            <span>Created by</span>
-            <div className="flex flex-row justify-start items-center gap-1 hover:text-slate-600 hover:cursor-pointer">
-              <Avatar email="alice@email.com" className="w-4 rounded-full" />
-              <span className="">alice_theone</span>
-            </div>
-          </div>
-          <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
-            <span>Jan 3, 2023</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="p-8 inline-block">
-      <div className="flex flex-wrap md:grid md:grid-cols-3 gap-4">
-        <TaskContent />
-
-        {/* fundingState:
-    | "AvailableCreator"
-    | "AvailableFunder"
-    | "ProgressCreator"
-    | "ProgressFunder"
-    | "ReviewAdmin"
-    | "ReviewUser"
-    | "Approved"
-    | "Rejected"; */}
-
-        <div className="flex h-full items-start">
-          <FundingContainer
-            fundingState="Rejected"
-            submissionHistory={submissionHistorySample}
-            totalFundingAmount={BigInt(435_123_456)}
-            fundingHistory={fundingHistorySample}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const TasksPage = () => {
-  // Task name
-  // Description (shortened)
-  // Status
-  //    * Awaiting approval - Acceptance deadline - Until when can it be aproved
-  //    * In progress - Due date
-  //    * Completed
-  //    * Rejected
-  //    * Needs review
-  // Rewards
-
-  return (
-    <div className="p-8 inline-block">
-      <div className="p-4 mb-8">
-        <h1 className="text-4xl text-slate-600 font-semibold">Tasks</h1>
-      </div>
-      <div className="flex flex-wrap gap-4">
-        <ProjectCard />
-        <ProjectCard />
-        <ProjectCard />
-        <ProjectCard />
-        <ProjectCard />
-      </div>
-    </div>
-  );
-};
-
-const UsersPage = () => {
-  return (
-    <div className="p-8 inline-block">
-      <div className="p-4 mb-8">
-        <h1 className="text-4xl text-slate-600 font-semibold">Users</h1>
-      </div>
-      <div className="flex flex-wrap gap-4">
-        <UserCard />
-        <UserCard />
-        <UserCard />
-        <UserCard />
-      </div>
-    </div>
-  );
-};
-
-const OrganizationPage = () => {
-  const [currentSelection, setCurrentSelection] =
-    useState<CurrentSideBarSelection>("SpecificTask");
-
+const OrganizationPage = ({
+  currentSelection,
+  children,
+}: OrganizationPageProps) => {
   return (
     <div className="bg-slate-100 h-screen w-full">
       <Header border />
       <div className="mt-20">
-        <Sidebar
-          currentSelection={currentSelection}
-          setCurrentSelection={setCurrentSelection}
-        />
-        <div className="fixed ml-80 pr-80 overflow-auto h-screen w-full">
-          {/* Your main page content */}
+        <Sidebar currentSelection={currentSelection} />
 
-          {currentSelection === "Tasks" && <TasksPage />}
-
-          {currentSelection === "Users" && <UsersPage />}
-
-          {currentSelection === "SpecificTask" && <SpecificTaskPage />}
-
-          {/* {currentSelection === "Profile" && <ProfilePage />} */}
+        <div className="fixed pb-20 ml-80 pr-80 overflow-auto h-full w-full">
+          {children}
         </div>
       </div>
     </div>
