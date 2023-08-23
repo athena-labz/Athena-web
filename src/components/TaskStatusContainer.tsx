@@ -19,7 +19,7 @@ const ButtonContainer = ({ children, onClick }: ButtonContainerProps) => (
 );
 
 type TaskStatusContainerProps = {
-  submissionHistory: SubmissionEvent[];
+  submissionHistory: SubmissionEventData[];
   taskStatus: TaskStatus;
   userRole: "Admin" | "AssignedUser" | "NormalUser";
 };

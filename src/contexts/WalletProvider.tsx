@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { createContext, useState, useContext, useEffect } from "react";
-import { C, Lucid, Blockfrost, WalletApi, Cardano } from "lucid-cardano";
+import { C, Lucid, Blockfrost, WalletApi, Cardano, SignedMessage } from "lucid-cardano";
 
 window.cardano = window.cardano || {};
 
@@ -10,6 +10,8 @@ export type WalletContext = {
   currentWallet: FullWallet | null;
   getWallets: () => Cardano | null;
   connect: (wallet: string) => Promise<void>;
+  getStakeAddress: () => Promise<string>;
+  signMessage: (message: string) => Promise<SignedMessage>;
 };
 
 export interface FullWallet extends WalletApi {
@@ -19,6 +21,10 @@ export interface FullWallet extends WalletApi {
 }
 
 export const Wallet = createContext<WalletContext | null>(null);
+
+const toHex = (bytes: WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>) =>
+  Buffer.from(bytes).toString("hex");
+const fromHex = (hex: WithImplicitCoercion<string>) => Buffer.from(hex, "hex");
 
 type WalletProviderProps = {
   children: JSX.Element;
@@ -44,10 +50,6 @@ export const WalletProvider = ({
   useEffect(() => {
     updateCurrentFullWallet();
   }, [currentWallet, wallets]);
-
-  useEffect(() => {
-    console.log(currentFullWallet);
-  }, [currentFullWallet]);
 
   const loadCardano = async () => {
     await setupLucid();
@@ -128,6 +130,50 @@ export const WalletProvider = ({
     }
   };
 
+  const getStakeAddress = async () => {
+    if (!walletLoaded) {
+      return Promise.reject("Wallet not loaded yet!");
+    }
+
+    if (!currentFullWallet) {
+      return Promise.reject("No wallet was selected!");
+    }
+
+    lucid!.selectWallet(currentFullWallet);
+
+    const address = await lucid!.wallet.rewardAddress();
+
+    if (address === null) {
+      return Promise.reject("Selected wallet does not have stake address");
+    }
+
+    return address;
+  };
+
+  const signMessage = async (message: string) => {
+    if (!walletLoaded) {
+      return Promise.reject("Wallet not loaded yet!");
+    }
+
+    if (!currentFullWallet) {
+      return Promise.reject("No wallet was selected!");
+    }
+
+    lucid!.selectWallet(currentFullWallet);
+
+    const address = await lucid!.wallet.rewardAddress();
+    if (address === null) {
+      return Promise.reject("Selected wallet does not have stake address");
+    }
+
+    const signedMessage = await lucid!.newMessage(
+      address,
+      toHex(Buffer.from(message, "utf8"))
+    ).sign();
+
+    return signedMessage;
+  };
+
   return (
     <Wallet.Provider
       value={{
@@ -135,6 +181,8 @@ export const WalletProvider = ({
         currentWallet: currentFullWallet,
         getWallets: () => wallets,
         connect,
+        getStakeAddress,
+        signMessage
       }}
     >
       {children}

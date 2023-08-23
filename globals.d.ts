@@ -3,24 +3,38 @@
 type UserData = {
   username: string;
   email: string;
-  name: string;
-  role: string;
+  isEmailConfirmed: boolean;
+  firstName: string;
+  lastName: string;
   stakeAddress: string;
-}
+};
+
+type TaskStatus = "Awaiting" | "Progress" | "Review" | "Approved" | "Rejected";
 
 type TaskData = {
   projectId: string;
   name: string;
   description: string;
-  status: string;
+  status: TaskStatus;
   date: string;
-}
+  userAssigned?: {
+    username: string;
+    email: string;
+  };
+};
 
-type TaskStatus = "Awaiting" | "Progress" | "Review" | "Approved" | "Rejected";
-
-type SubmissionEvent = {
+type SubmissionEventData = {
   title: string;
   type: "submission" | "approval" | "rejection" | "revision";
   content: string;
   date: string;
 };
+
+type ListResponse<T> = {
+  currentPage: number;
+  maxPage: number;
+  elements: T[];
+};
+
+type TaskListData = ListResponse<TaskData>;
+type UserListData = ListResponse<UserOrganizationData>;

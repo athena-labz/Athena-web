@@ -4,7 +4,7 @@ import { Avatar } from "../components/User";
 import { LoadingIcon } from "../components/LoadingIcon";
 import { ProjectCard } from "../components/ProjectCard";
 
-import { taskListSample, userDataSample } from "../assets/samples";
+import { useBackEnd } from "../contexts/BackEndProvider";
 
 import { capitalize, abbreviate } from "../utils/stringHelpers";
 
@@ -113,29 +113,50 @@ const ProfileContainer = ({
 };
 
 type ProfilePageProps = {
+  organization: string;
   username: string;
 };
 
-const ProfilePage = ({ username }: ProfilePageProps) => {
+const ProfilePage = ({ organization, username }: ProfilePageProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [userAssignedTasks, setUserAssignedTasks] = useState<TaskData[] | null>(
-    null
-  );
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userAssignedTasks, setUserAssignedTasks] =
+    useState<TaskListData | null>(null);
+  const [userAssignedTasksPage, setUserAssignedTasksPage] = useState<number>(1);
+
+  const { getUserInformation, getTaskListAssignedUser, getUserRole } =
+    useBackEnd()!;
 
   useEffect(() => {
-    getUserData();
-    getUserAssignedTasks();
+    updateUserData();
   }, []);
 
-  const getUserData = async () => {
-    setTimeout(() => {
-      setUserData(userDataSample as UserData);
-    }, 2_000);
+  useEffect(() => {
+    updateUserAssignedTasks(userAssignedTasksPage);
+  }, [userAssignedTasksPage]);
+
+  const updateUserData = async () => {
+    getUserInformation(username).then((userData) => {
+      setUserData(userData);
+
+      getUserRole(username).then((role) => {
+        setUserRole(role);
+      });
+    });
   };
 
-  const getUserAssignedTasks = async () => {
+  const updateUserAssignedTasks = async (page: number) => {
+    setUserAssignedTasks(null);
+
+    const assignedTasks = await getTaskListAssignedUser(
+      username,
+      organization,
+      page,
+      3
+    );
+
     setTimeout(() => {
-      setUserAssignedTasks(taskListSample);
+      setUserAssignedTasks(assignedTasks);
     }, 2_000);
   };
 
@@ -152,38 +173,66 @@ const ProfilePage = ({ username }: ProfilePageProps) => {
           <ProfileContainer
             email={userData.email}
             username={userData.username}
-            name={userData.name}
-            role={userData.role}
+            name={`${userData.firstName} ${userData.lastName}`}
+            role={userRole ? userRole : "Role not found"}
             stakeAddress={userData.stakeAddress}
           />
-          {userAssignedTasks === null && (
-            <div className="flex w-full justify-center items-center">
-              <LoadingIcon className="text-blue-500 w-24 h-24" />
-            </div>
-          )}
 
-          {userAssignedTasks && (
-            <div className="inline-block">
-              <div className="p-4 mb-4">
-                <h1 className="text-4xl text-slate-600 font-semibold">
-                  Assigned tasks
-                </h1>
+          <div className="inline-block">
+            <div className="p-4 mb-4">
+              <h1 className="text-4xl text-slate-600 font-semibold">
+                Assigned tasks
+              </h1>
+            </div>
+
+            {userAssignedTasks === null && (
+              <div className="flex w-full justify-center items-center">
+                <LoadingIcon className="text-blue-500 w-24 h-24" />
               </div>
-              <div className="flex flex-wrap gap-4">
-                {userAssignedTasks.map(
-                  ({ projectId, name, description, status, date }) => (
-                    <ProjectCard
-                      projectId={projectId}
-                      name={name}
-                      description={description}
-                      status={status as TaskStatus}
-                      date={date}
+            )}
+
+            {userAssignedTasks && (
+              <div className="flex flex-row gap-8">
+                <div className="flex flex-row gap-4">
+                  {userAssignedTasksPage > 1 && (
+                    <div className="flex items-center">
+                      <img
+                        onClick={() =>
+                          setUserAssignedTasksPage(userAssignedTasksPage - 1)
+                        }
+                        className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
+                        src="/assets/left.svg"
+                      />
+                    </div>
+                  )}
+
+                  {userAssignedTasks.elements.map(
+                    ({ projectId, name, description, status, date }) => (
+                      <ProjectCard
+                        projectId={projectId}
+                        name={name}
+                        description={description}
+                        status={status as TaskStatus}
+                        date={date}
+                      />
+                    )
+                  )}
+                </div>
+
+                {userAssignedTasksPage < userAssignedTasks.maxPage && (
+                  <div className="flex items-center">
+                    <img
+                      onClick={() =>
+                        setUserAssignedTasksPage(userAssignedTasksPage + 1)
+                      }
+                      className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
+                      src="/assets/right.svg"
                     />
-                  )
+                  </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>

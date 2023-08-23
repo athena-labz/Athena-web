@@ -5,13 +5,14 @@ import { LoadingIcon } from "../components/LoadingIcon";
 import { TaskStatusContainer } from "../components/TaskStatusContainer";
 
 import { taskContentSample } from "../assets/samples";
+import { useBackEnd } from "../contexts/BackEndProvider";
 
 type TaskContent = {
   name: string;
   taskStatus: TaskStatus;
   description: string;
   date: string;
-  submissionHistory: SubmissionEvent[];
+  submissionHistory: SubmissionEventData[];
   userAssigned?: {
     username: string;
     email: string;
@@ -60,17 +61,30 @@ const TaskContent = ({
   </div>
 );
 
-const SpecificTaskPage = () => {
-  const [taskData, setTaskData] = useState<TaskContent | null>(null);
+type SpecificTaskPageProps = {
+  taskId: string;
+};
+
+const SpecificTaskPage = ({ taskId }: SpecificTaskPageProps) => {
+  const [taskData, setTaskData] = useState<TaskData | null>(null);
+  const [submissionHistory, setSubmissionHistory] = useState<
+    SubmissionEventData[] | null
+  >(null);
+
+  const backEnd = useBackEnd()!;
 
   useEffect(() => {
-    getTaskData();
+    loadTaskInformation();
   }, []);
 
-  const getTaskData = async () => {
-    setTimeout(() => {
-      setTaskData(taskContentSample as TaskContent);
-    }, 2_000)
+  const loadTaskInformation = async () => {
+    backEnd.getTaskInformation(taskId).then((taskData) => {
+      setTaskData(taskData);
+    });
+
+    backEnd.getTaskSubmissionHistory(taskId).then((submissionHistory) => {
+      setSubmissionHistory(submissionHistory);
+    });
   };
 
   return (
@@ -81,7 +95,7 @@ const SpecificTaskPage = () => {
         </div>
       )}
 
-      {taskData && (
+      {taskData && submissionHistory && (
         <div className="flex flex-wrap md:grid md:grid-cols-3 gap-4">
           <TaskContent
             name={taskData.name}
@@ -92,9 +106,9 @@ const SpecificTaskPage = () => {
 
           <div className="flex h-full items-start">
             <TaskStatusContainer
-              taskStatus={taskData.taskStatus}
+              taskStatus={taskData.status}
               userRole="AssignedUser"
-              submissionHistory={taskData.submissionHistory}
+              submissionHistory={submissionHistory}
             />
           </div>
         </div>
