@@ -6,12 +6,14 @@ import { useBackEnd } from "./BackEndProvider";
 import { useWallet } from "./WalletProvider";
 
 import { v4 as uuidv4 } from "uuid";
+import { useNavigate } from "react-router-dom";
 
 type UserContext = {
   isLoaded: boolean;
   isUserSignedIn: boolean;
   user: UserData | null;
   signIn: () => Promise<void>;
+  navigateAfterSignIn: (route: string) => Promise<void>;
   signUp: (
     firstName: string,
     lastName: string,
@@ -26,7 +28,7 @@ type UserContext = {
 };
 
 type UserProviderProps = {
-  children: JSX.Element;
+  children: React.ReactNode;
 };
 
 export const User = createContext<UserContext | null>(null);
@@ -36,6 +38,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const navigate = useNavigate();
   const backEnd = useBackEnd()!;
   const wallet = useWallet()!;
 
@@ -85,6 +88,17 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   };
 
+  const navigateAfterSignIn = async (route: string) => {
+    signIn()
+      .then(() => {
+        navigate(route);
+      })
+      .catch((error) => {
+        // Replace by toastify
+        console.error(error);
+      });
+  };
+
   const signUp = async (
     username: string,
     email: string,
@@ -120,6 +134,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         user,
         isUserSignedIn: user !== null,
         signIn,
+        navigateAfterSignIn,
         signUp,
         logOut,
         registerInOrganization: backEnd.registerInOrganization,

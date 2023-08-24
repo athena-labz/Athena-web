@@ -2,15 +2,17 @@ import React, { useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { Connector } from "./Connector";
-
-const whitelistedWallets = ["eternl", "nami"];
+import { UserHandler } from "./UserHandler";
 
 type HeaderProps = {
   border?: boolean;
+  disableUserHandler?: boolean;
 };
 
-const Header = ({ border = false }: HeaderProps) => {
+const Header = ({
+  border = false,
+  disableUserHandler = false,
+}: HeaderProps) => {
   const navigate = useNavigate();
 
   return (
@@ -30,9 +32,10 @@ const Header = ({ border = false }: HeaderProps) => {
       <div className="absolute left-1/2 transform -translate-x-1/2">
         {/* Content for the center field */}
       </div>
-      <div className="flex items-center">
+      <div className="flex gap-4 items-center">
         {/* Content for the right field */}
-        <Connector whitelistedWallets={whitelistedWallets} />
+
+        {!disableUserHandler && <UserHandler />}
       </div>
     </header>
   );

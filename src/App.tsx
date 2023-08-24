@@ -2,6 +2,8 @@ import React from "react";
 
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
 
+import { ToastContainer } from "react-toastify";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
@@ -15,9 +17,14 @@ import SpecificTaskPage from "./pages/SpecficTaskPage";
 import TasksPage from "./pages/TasksPage";
 import ProfilePage from "./pages/ProfilePage";
 
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+
 import { WalletProvider } from "./contexts/WalletProvider";
 import { BackEndProvider } from "./contexts/BackEndProvider";
 import { UserProvider } from "./contexts/UserProvider";
+
+import "react-toastify/dist/ReactToastify.css";
 
 const RedirectToTasks = () => {
   const { organization } = useParams<{ organization: string }>();
@@ -75,8 +82,24 @@ function App() {
     <BackEndProvider>
       <WalletProvider networkMode="testnet">
         <UserProvider>
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
+
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="signin" element={<SignIn />} />
+            <Route path="signup" element={<SignUp />} />
+
             <Route
               path="/organization/create"
               element={

@@ -45,7 +45,7 @@ export const WalletSelector = ({
   const { walletLoaded, currentWallet, getWallets } = useWallet()!;
 
   if (walletLoaded === false) {
-    return <div>Loading</div>;
+    return <></>
   }
 
   const wallets = getWallets()!;
