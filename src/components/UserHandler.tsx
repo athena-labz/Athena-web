@@ -19,7 +19,7 @@ const Selector = ({ username, email, stakeAddress }: SelectorProps) => {
   const [stakeAddressAbbreviated, setStakeAddressAbbreviated] = useState(true);
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-row items-center gap-2">
       <div className="flex flex-row items-center gap-1">
         <div
           onClick={() => setOptionSelected("email")}
@@ -104,13 +104,13 @@ export const UserHandler = ({}: UserHandlerProps) => {
     );
   } else {
     return (
-      <div className="flex flex-row gap-4 items-center">
-        <Avatar email={user.user!.email} className="h-12 rounded-full" />
+      <div className="flex flex-row gap-4 justify-between items-center w-80 bg-white p-2 px-4 rounded-lg">
         <Selector
           username={user.user!.username}
           email={user.user!.email}
           stakeAddress={user.user!.stakeAddress}
         />
+        <Avatar email={user.user!.email} className="h-12 rounded-full" />
       </div>
     );
   }
