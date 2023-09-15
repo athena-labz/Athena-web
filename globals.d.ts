@@ -38,3 +38,8 @@ type ListResponse<T> = {
 
 type TaskListData = ListResponse<TaskData>;
 type UserListData = ListResponse<UserOrganizationData>;
+
+type StudentReward = {
+  email: string;
+  rewards: number;
+};

@@ -5,6 +5,9 @@ import { Avatar } from "./User";
 
 import { abbreviate } from "../utils/stringHelpers";
 import { useNavigate } from "react-router-dom";
+import { SignInHandler } from "./SignInHandler";
+
+const whitelistedWallets = ["eternl", "nami"];
 
 type SelectorProps = {
   username: string;
@@ -88,12 +91,11 @@ export const UserHandler = ({}: UserHandlerProps) => {
   if (!user.isUserSignedIn) {
     return (
       <div className="flex flex-row gap-4 items-center">
-        <button
-          onClick={() => navigate("/signin")}
+        <SignInHandler
+          whitelistedWallets={whitelistedWallets}
+          onSignIn={() => {}}
           className="py-2 px-8 rounded-full bg-white text-dark-blue text-normal md:text-lg font-bold"
-        >
-          Sign In
-        </button>
+        />
         <button
           onClick={() => navigate("/signup")}
           className="py-2 px-8 rounded-full bg-dark-blue text-normal text-white md:text-lg font-bold"

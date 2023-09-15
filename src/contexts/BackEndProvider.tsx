@@ -9,6 +9,8 @@ import {
   submissionHistorySample,
 } from "../assets/samples";
 
+import { v4 as uuidv4 } from "uuid";
+
 type BackEndContext = {
   getUserInformation: (username: string) => Promise<UserData>;
   getUserRole: (username: string) => Promise<string>;
@@ -30,6 +32,15 @@ type BackEndContext = {
     count: number
   ) => Promise<TaskListData>;
   getTaskSubmissionHistory: (taskId: string) => Promise<SubmissionEventData[]>;
+  createTask: (
+    user: UserData,
+    signature: string,
+    name: string,
+    description: string,
+    daysToComplete: number,
+    userRewards: number,
+    studentRewards: StudentReward[]
+  ) => Promise<void>;
   signIn: (
     stakeAddress: string,
     signatureKey: string,
@@ -80,7 +91,15 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   const getTaskInformation = async (taskId: string) => {
     await waitForDelay(500);
 
-    return taskContentSample as TaskData;
+    const tasksString = localStorage.getItem("@tasks");
+    const tasks: TaskData[] =
+      tasksString === null ? [] : JSON.parse(tasksString);
+
+    const specificTask = tasks.reduce((acc, task) =>
+      task.projectId === taskId ? task : acc
+    );
+
+    return specificTask;
   };
 
   const getTaskList = async (
@@ -90,7 +109,11 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   ) => {
     await waitForDelay(500);
 
-    const tasks = taskListSample.slice((page - 1) * count, page * count);
+    const fullTasksString = localStorage.getItem("@tasks");
+    const fullTasks =
+      fullTasksString === null ? [] : JSON.parse(fullTasksString);
+
+    const tasks = fullTasks.slice((page - 1) * count, page * count);
     if (tasks.length === 0) {
       console.error("Tried to get tasks for page that does not exist");
 
@@ -106,6 +129,43 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       currentPage: page,
       maxPage: ~~((tasks.length - 1) / count) + 1,
     };
+  };
+
+  const createTask = async (
+    user: UserData,
+    signature: string,
+    name: string,
+    description: string,
+    daysToComplete: number,
+    userRewards: number,
+    studentRewards: StudentReward[]
+  ) => {
+    await waitForDelay(500);
+
+    const tasksString = localStorage.getItem("@tasks");
+    const tasks = tasksString === null ? [] : JSON.parse(tasksString);
+
+    localStorage.setItem(
+      "@tasks",
+      JSON.stringify([
+        ...tasks,
+        {
+          projectId: uuidv4(),
+          name: name,
+          description: description,
+          status: "Awaiting",
+          date: new Intl.DateTimeFormat("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          }).format(new Date()),
+          userAssigned: {
+            username: user.username,
+            email: user.email,
+          },
+        },
+      ])
+    );
   };
 
   const getUserList = async (
@@ -207,6 +267,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         getUserRole,
         getTaskInformation,
         getTaskList,
+        createTask,
         getUserList,
         getTaskListAssignedUser,
         getTaskSubmissionHistory,

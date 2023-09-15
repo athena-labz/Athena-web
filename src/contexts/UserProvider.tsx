@@ -3,7 +3,7 @@ import * as React from "react";
 import { createContext, useState, useContext, useEffect } from "react";
 
 import { useBackEnd } from "./BackEndProvider";
-import { useWallet } from "./WalletProvider";
+import { FullWallet, useWallet } from "./WalletProvider";
 
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";

@@ -25,6 +25,7 @@ import { BackEndProvider } from "./contexts/BackEndProvider";
 import { UserProvider } from "./contexts/UserProvider";
 
 import "react-toastify/dist/ReactToastify.css";
+import CreateTaskPage from "./pages/CreateTaskPage";
 
 const RedirectToTasks = () => {
   const { organization } = useParams<{ organization: string }>();
@@ -44,6 +45,34 @@ const SpecificTaskRedirect = () => {
   return (
     <OrganizationPage currentSelection="tasks">
       <SpecificTaskPage taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
+type CreateTaskRedirectParams = { organization: string };
+
+const CreateTaskRedirect = () => {
+  const { organization } = useParams<CreateTaskRedirectParams>();
+
+  if (!organization) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage currentSelection="tasks">
+      <CreateTaskPage organization={organization} />
+    </OrganizationPage>
+  );
+};
+
+type TasksRedirectParams = { organization: string };
+
+const TasksRedirect = () => {
+  const { organization } = useParams<TasksRedirectParams>();
+
+  if (!organization) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage currentSelection="tasks">
+      <TasksPage organization={organization} />
     </OrganizationPage>
   );
 };
@@ -123,9 +152,16 @@ function App() {
                 path="/organization/:organization/tasks"
                 element={
                   <ProtectedRoute>
-                    <OrganizationPage currentSelection="tasks">
-                      <TasksPage />
-                    </OrganizationPage>
+                    <TasksRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organization/tasks/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateTaskRedirect />
                   </ProtectedRoute>
                 }
               />

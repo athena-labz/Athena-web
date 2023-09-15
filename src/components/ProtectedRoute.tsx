@@ -7,7 +7,11 @@ type ProtectedRouteProps = {
 };
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isUserSignedIn } = useUser()!;
+  const { isUserSignedIn, isLoaded } = useUser()!;
+
+  if (!isLoaded) {
+    return <></>;
+  }
 
   if (!isUserSignedIn) {
     return <Navigate to="/signin" replace />;

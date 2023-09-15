@@ -19,9 +19,25 @@ export const SignInHandler = ({
   className,
 }: SignInHandlerProps) => {
   const [walletSelectorShow, setWalletSelectorShow] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
 
-  const { connect } = useWallet()!;
+  const { connect, currentWallet } = useWallet()!;
   const { signIn } = useUser()!;
+
+  useEffect(() => {
+    if (currentWallet !== null && walletConnected) {
+      setWalletConnected(false);
+
+      signIn()
+        .then(() => {
+          toast.success("Successfully signed in!");
+          onSignIn();
+        })
+        .catch((error) => {
+          toast.error(error);
+        });
+    }
+  }, [currentWallet, walletConnected]);
 
   return (
     <div>
@@ -38,13 +54,7 @@ export const SignInHandler = ({
 
           connect(wallet)
             .then(() => {
-              signIn()
-                .then(() => {
-                  onSignIn();
-                })
-                .catch((error) => {
-                  toast.error(error);
-                });
+              setWalletConnected(true);
             })
             .catch((error: any) => {
               if (error === undefined || error === null)

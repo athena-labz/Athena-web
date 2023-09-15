@@ -48,7 +48,7 @@ export const WalletProvider = ({
   }, []);
 
   useEffect(() => {
-    updateCurrentFullWallet();
+    updateCurrentFullWallet(currentWallet);
   }, [currentWallet, wallets]);
 
   const loadCardano = async () => {
@@ -101,16 +101,16 @@ export const WalletProvider = ({
     }
   };
 
-  const updateCurrentFullWallet = async () => {
-    const currentFullWallet = await getCurrentWallet();
+  const updateCurrentFullWallet = async (wallet: string | null) => {
+    const currentFullWallet = await getCurrentWallet(wallet);
     setCurrentFullWallet(currentFullWallet);
   };
 
-  const getCurrentWallet = async () => {
-    if (currentWallet && wallets !== null && currentWallet in wallets) {
-      const wallet = await wallets[currentWallet].enable();
+  const getCurrentWallet = async (wallet: string | null) => {
+    if (wallet && wallets !== null && wallet in wallets) {
+      const fullWallet = await wallets[wallet].enable();
 
-      return { ...wallet, ...wallets[currentWallet] };
+      return { ...fullWallet, ...wallets[wallet] };
     } else {
       return null;
     }
@@ -127,6 +127,7 @@ export const WalletProvider = ({
       return Promise.reject(`Wallet ${wallet} not installed.`);
     } else {
       setCurrentWallet(wallet);
+      updateCurrentFullWallet(wallet);
     }
   };
 

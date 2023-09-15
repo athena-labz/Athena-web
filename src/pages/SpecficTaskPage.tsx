@@ -36,7 +36,7 @@ const TaskContent = ({
   userAssigned,
 }: TaskContentProps) => (
   <div className="flex h-full items-start col-span-2">
-    <div className="flex flex-col gap-4 bg-white rounded-lg p-8">
+    <div className="flex flex-col w-full gap-4 bg-white rounded-lg p-8">
       <h1 className="text-3xl text-slate-600 font-semibold">{name}</h1>
       <hr />
       <h1 className="text-2xl text-slate-600 font-semibold">About this task</h1>
