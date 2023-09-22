@@ -23,6 +23,12 @@ type TaskData = {
   };
 };
 
+type NFTData = {
+  nftId: string;
+  name: string;
+  image: string;
+}
+
 type SubmissionEventData = {
   title: string;
   type: "submission" | "approval" | "rejection" | "revision";
@@ -36,6 +42,7 @@ type ListResponse<T> = {
   elements: T[];
 };
 
+type NFTListData = ListResponse<NFTData>;
 type TaskListData = ListResponse<TaskData>;
 type UserListData = ListResponse<UserOrganizationData>;
 

@@ -85,7 +85,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   const getUserRole = async (username: string) => {
     await waitForDelay(500);
 
-    return "coach";
+    return "coordinator";
   };
 
   const getTaskInformation = async (taskId: string) => {

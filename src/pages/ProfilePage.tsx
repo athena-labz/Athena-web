@@ -92,10 +92,10 @@ const ProfileContainer = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-4 bg-white rounded-lg p-8">
+    <div className="w-full flex flex-row justify-between gap-4 bg-white rounded-lg p-8">
       <div className="flex flex-row gap-8">
         <Avatar email={email} className="h-24 rounded-full" />
-        <div className="h-full flex items-center">
+        <div className="h-full flex">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col">
               <span className="text-4xl text-slate-600">{name}</span>
@@ -105,6 +105,27 @@ const ProfileContainer = ({
               <img className="h-6" src="/assets/role.svg" />
               <span>{capitalize(role)}</span>
             </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-row gap-4">
+        <div className="flex flex-col gap-2 bg-slate-100 p-4 px-8 rounded-lg">
+          <span className="text-lg text-slate-600 font-bold text-right">
+            Tokens
+          </span>
+          <div className="flex flex-col text-right">
+            <span className="text-sm text-slate-500">Earned: 400 BSC</span>
+            <span className="text-sm text-slate-500">Pending: 100 BSC</span>
+            <span className="text-sm text-slate-600">Total: 500 BSC</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-2 bg-slate-100 p-4 px-8 rounded-lg">
+          <span className="text-lg text-slate-600 font-bold text-right">
+            Tasks
+          </span>
+          <div className="flex flex-col text-right">
+            <span className="text-sm text-slate-500">Completed: 7</span>
+            <span className="text-sm text-slate-500">In progress: 3</span>
           </div>
         </div>
       </div>
@@ -120,9 +141,21 @@ type ProfilePageProps = {
 const ProfilePage = ({ organization, username }: ProfilePageProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+
   const [userAssignedTasks, setUserAssignedTasks] =
     useState<TaskListData | null>(null);
   const [userAssignedTasksPage, setUserAssignedTasksPage] = useState<number>(1);
+
+  const [userNFTs, setUserNFTs] = useState<NFTListData | null>({
+    currentPage: 1,
+    maxPage: 1,
+    elements: [
+      { nftId: "", name: "Isola Bella", image: "/assets/isola_bella_nft.png" },
+      { nftId: "", name: "Forte di Orino", image: "/assets/forte_di_orino_nft.png" },
+      { nftId: "", name: "The Basilica", image: "/assets/the_basilica_nft.png" },
+    ],
+  });
+  const [userNFTsPage, setUserNFTsPage] = useState<number>(1);
 
   const { getUserInformation, getTaskListAssignedUser, getUserRole } =
     useBackEnd()!;
@@ -177,6 +210,57 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
             role={userRole ? userRole : "Role not found"}
             stakeAddress={userData.stakeAddress}
           />
+
+          <div className="inline-block">
+            <div className="p-4 mb-4">
+              <h1 className="text-4xl text-slate-600 font-semibold">NFTs</h1>
+            </div>
+
+            {userNFTs === null && (
+              <div className="flex w-full justify-center items-center">
+                <LoadingIcon className="text-blue-500 w-24 h-24" />
+              </div>
+            )}
+
+            {userNFTs && (
+              <div className="flex flex-row gap-8">
+                <div className="flex flex-row gap-4">
+                  {userNFTsPage > 1 && (
+                    <div className="flex items-center">
+                      <img
+                        onClick={() => setUserNFTsPage(userNFTsPage - 1)}
+                        className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
+                        src="/assets/left.svg"
+                      />
+                    </div>
+                  )}
+
+                  {userNFTs.elements.map(({ name, image }) => (
+                    <div className="flex flex-col text-slate-600 gap-2 w-72 p-8 px-12 bg-white rounded-lg text-center justify-center w-full">
+                      <span className="text-lg font-semibold">{name}</span>
+                      <img className="h-48 w-48 p-2 rounded-lg" src={image} />
+
+                      <div className="mt-4">
+                        <button className="p-4 px-12 hover:cursor-pointer gap-2 items-center bg-dark-blue rounded-lg">
+                          <span className="text-white text-lg font-bold">Claim</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {userNFTsPage < userNFTs.maxPage && (
+                  <div className="flex items-center">
+                    <img
+                      onClick={() => setUserNFTsPage(userNFTsPage + 1)}
+                      className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
+                      src="/assets/right.svg"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="inline-block">
             <div className="p-4 mb-4">
