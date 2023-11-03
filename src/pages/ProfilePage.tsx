@@ -7,26 +7,23 @@ import { ProjectCard } from "../components/ProjectCard";
 import { useBackEnd } from "../contexts/BackEndProvider";
 
 import { capitalize, abbreviate } from "../utils/stringHelpers";
+import { useUser } from "../contexts/UserProvider";
 
 type ProfileContainerProps = {
   email: string;
-  username: string;
-  name: string;
-  role: string;
   stakeAddress: string;
+  type: string;
 };
 
 const ProfileContainer = ({
   email,
-  username,
-  name,
-  role,
   stakeAddress,
+  type,
 }: ProfileContainerProps) => {
   const Selector = () => {
-    const [optionSelected, setOptionSelected] = useState<
-      "wallet" | "email" | "username"
-    >("email");
+    const [optionSelected, setOptionSelected] = useState<"wallet" | "email">(
+      "email"
+    );
     const [stakeAddressAbbreviated, setStakeAddressAbbreviated] =
       useState(true);
 
@@ -47,19 +44,6 @@ const ProfileContainer = ({
             />
           </div>
           <div
-            onClick={() => setOptionSelected("username")}
-            className={`${
-              optionSelected === "username" ? "bg-slate-500" : ""
-            } rounded-full border-slate-500 border p-1 hover:cursor-pointer`}
-          >
-            <img
-              className="h-4"
-              src={`/assets/person_profile${
-                optionSelected === "username" ? "_selected" : ""
-              }.svg`}
-            />
-          </div>
-          <div
             onClick={() => setOptionSelected("wallet")}
             className={`${
               optionSelected === "wallet" ? "bg-slate-500" : ""
@@ -75,8 +59,6 @@ const ProfileContainer = ({
         </div>
         {optionSelected === "email" ? (
           <span className="text-slate-500">{email}</span>
-        ) : optionSelected === "username" ? (
-          <span className="text-slate-500">{username}</span>
         ) : (
           <span
             onClick={() => setStakeAddressAbbreviated(!stakeAddressAbbreviated)}
@@ -98,12 +80,12 @@ const ProfileContainer = ({
         <div className="h-full flex">
           <div className="flex flex-col gap-4">
             <div className="flex flex-col">
-              <span className="text-4xl text-slate-600">{name}</span>
+              <span className="text-4xl text-slate-600">{email}</span>
               <Selector />
             </div>
             <div className="flex flex-row text-dark-blue font-semibold items-end gap-1">
               <img className="h-6" src="/assets/role.svg" />
-              <span>{capitalize(role)}</span>
+              <span>{capitalize(type)}</span>
             </div>
           </div>
         </div>
@@ -151,8 +133,16 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
     maxPage: 1,
     elements: [
       { nftId: "", name: "Isola Bella", image: "/assets/isola_bella_nft.png" },
-      { nftId: "", name: "Forte di Orino", image: "/assets/forte_di_orino_nft.png" },
-      { nftId: "", name: "The Basilica", image: "/assets/the_basilica_nft.png" },
+      {
+        nftId: "",
+        name: "Forte di Orino",
+        image: "/assets/forte_di_orino_nft.png",
+      },
+      {
+        nftId: "",
+        name: "The Basilica",
+        image: "/assets/the_basilica_nft.png",
+      },
     ],
   });
   const [userNFTsPage, setUserNFTsPage] = useState<number>(1);
@@ -169,7 +159,7 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
   }, [userAssignedTasksPage]);
 
   const updateUserData = async () => {
-    getUserInformation(username).then((userData) => {
+    getUserMe(username).then((userData) => {
       setUserData(userData);
 
       getUserRole(username).then((role) => {
@@ -242,7 +232,9 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
 
                       <div className="mt-4">
                         <button className="p-4 px-12 hover:cursor-pointer gap-2 items-center bg-dark-blue rounded-lg">
-                          <span className="text-white text-lg font-bold">Claim</span>
+                          <span className="text-white text-lg font-bold">
+                            Claim
+                          </span>
                         </button>
                       </div>
                     </div>

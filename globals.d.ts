@@ -1,33 +1,37 @@
 // globals.d.ts
 
 type UserData = {
-  username: string;
+  userType: "student" | "teacher" | "organizer";
   email: string;
-  isEmailConfirmed: boolean;
-  firstName: string;
-  lastName: string;
   stakeAddress: string;
+  token: string;
 };
 
-type TaskStatus = "Awaiting" | "Progress" | "Review" | "Approved" | "Rejected";
-
-type TaskData = {
-  projectId: string;
+type OrganizationData = {
+  identifier: string;
+  type: "groups" | "individual";
   name: string;
   description: string;
+  areas: string[];
+  creationDate: Date;
+};
+
+type TaskStatus = "Awaiting" | "Progress" | "Approved" | "Rejected";
+
+type TaskData = {
+  identifier: string;
+  name: string;
+  description: string;
+  deadline: Date;
   status: TaskStatus;
   date: string;
-  userAssigned?: {
-    username: string;
-    email: string;
-  };
 };
 
 type NFTData = {
   nftId: string;
   name: string;
   image: string;
-}
+};
 
 type SubmissionEventData = {
   title: string;

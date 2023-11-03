@@ -7,22 +7,18 @@ import { FullWallet, useWallet } from "./WalletProvider";
 
 import { v4 as uuidv4 } from "uuid";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-type UserContext = {
+import { jwtDecode } from "jwt-decode";
+
+export type UserContext = {
   isLoaded: boolean;
   isUserSignedIn: boolean;
   user: UserData | null;
   signIn: () => Promise<void>;
-  navigateAfterSignIn: (route: string) => Promise<void>;
   signUp: (
-    firstName: string,
-    lastName: string,
-    username: string,
+    userType: "student" | "teacher" | "organizer",
     email: string
-  ) => Promise<void>;
-  registerInOrganization: (
-    organizationId: string,
-    role: string
   ) => Promise<void>;
   logOut: () => void;
 };
@@ -35,10 +31,10 @@ export const User = createContext<UserContext | null>(null);
 
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<UserData | null>(null);
-
   const [isLoaded, setIsLoaded] = useState(false);
 
   const navigate = useNavigate();
+
   const backEnd = useBackEnd()!;
   const wallet = useWallet()!;
 
@@ -47,18 +43,20 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, []);
 
   const retrieveUser = () => {
-    const user = localStorage.getItem("@user");
+    const currentUser = localStorage.getItem("@user");
 
-    if (user !== null) {
-      updateUser(JSON.parse(user) as UserData);
+    if (currentUser !== null) {
+      const parsedUser: UserData = JSON.parse(currentUser);
+      console.log("token", jwtDecode(parsedUser.token));
+      setUser(parsedUser);
     }
 
     setIsLoaded(true);
   };
 
-  const updateUser = (user: UserData) => {
+  const saveUser = (user: UserData) => {
+    console.log("token", jwtDecode(user.token));
     localStorage.setItem("@user", JSON.stringify(user));
-
     setUser(user);
   };
 
@@ -70,60 +68,68 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const signIn = async () => {
     const stakeAddress = await wallet.getStakeAddress();
     const signedMessage = await wallet.signMessage(
-      `Signing in at Athena at ${Date.now()} with code ${uuidv4()}`
+      `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${Math.floor(
+        Date.now() / 1000
+      )}`
     );
 
     try {
-      const user = await backEnd.signIn(
+      const token = await backEnd.signIn(
         stakeAddress,
-        signedMessage.key,
-        signedMessage.signature
+        signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
       );
 
-      updateUser(user);
+      const user = await backEnd.getUserMe(token);
 
-      return Promise.resolve();
+      saveUser(user);
+      toast.success("Signed in successfully!");
     } catch (error) {
-      return Promise.reject(error as string);
+      console.error(error);
+      toast.error("Login failed! Make sure you have a valid account.");
+      Promise.reject(error);
     }
   };
 
-  const navigateAfterSignIn = async (route: string) => {
-    signIn()
-      .then(() => {
-        navigate(route);
-      })
-      .catch((error) => {
-        // Replace by toastify
-        console.error(error);
-      });
-  };
-
   const signUp = async (
-    username: string,
-    email: string,
-    firstName: string,
-    lastName: string
+    userType: "student" | "teacher" | "organizer",
+    email: string
   ) => {
     const stakeAddress = await wallet.getStakeAddress();
-    const signedMessage = await wallet.signMessage(
-      `Signing up at Athena at ${Date.now()} with code ${uuidv4()}`
-    );
 
     try {
-      const user = await backEnd.signUp(
-        stakeAddress,
-        signedMessage.key,
-        signedMessage.signature,
-        username,
-        email,
-        firstName,
-        lastName
+      const signedMessage = await wallet.signMessage(
+        `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${Math.floor(
+          Date.now() / 1000
+        )}`
       );
 
-      return Promise.resolve();
+      try {
+        await backEnd.signUp(
+          userType,
+          email,
+          stakeAddress,
+          signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
+        );
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          "Register failed! Make sure you have the right information."
+        );
+      }
+
+      try {
+        const token = await backEnd.signIn(
+          stakeAddress,
+          signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
+        );
+        console.log(token);
+      } catch (error) {
+        console.error(error);
+        toast.error("Server error while trying to sign in");
+      }
     } catch (error) {
-      return Promise.reject(error as string);
+      console.error(error);
+      toast.error("Something went wrong while signing the message");
     }
   };
 
@@ -134,10 +140,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         user,
         isUserSignedIn: user !== null,
         signIn,
-        navigateAfterSignIn,
         signUp,
         logOut,
-        registerInOrganization: backEnd.registerInOrganization,
       }}
     >
       {children}

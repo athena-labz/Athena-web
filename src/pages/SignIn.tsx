@@ -25,7 +25,9 @@ const SignIn = () => {
             whitelistedWallets={whitelistedWallets}
             onSignIn={() => navigate("/")}
             className="py-2 w-full md:w-36 rounded-full border-dark-blue border-2 text-dark-blue text-normal md:text-lg font-bold"
-          />
+          >
+            Sign In
+          </SignInHandler>
 
           <button
             onClick={() => navigate("/signup")}

@@ -9,55 +9,74 @@ import {
   submissionHistorySample,
 } from "../assets/samples";
 
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
-type BackEndContext = {
-  getUserInformation: (username: string) => Promise<UserData>;
-  getUserRole: (username: string) => Promise<string>;
-  getTaskInformation: (taskId: string) => Promise<TaskData>;
-  getTaskList: (
-    organizationId: string,
-    page: number,
-    count: number
-  ) => Promise<TaskListData>;
-  getUserList: (
-    organizationId: string,
-    page: number,
-    count: number
-  ) => Promise<UserListData>;
-  getTaskListAssignedUser: (
-    username: string,
-    organizationId: string,
-    page: number,
-    count: number
-  ) => Promise<TaskListData>;
-  getTaskSubmissionHistory: (taskId: string) => Promise<SubmissionEventData[]>;
-  createTask: (
-    user: UserData,
-    signature: string,
+const api = axios.create({
+  baseURL: process.env.REACT_APP_BASE_URL,
+  timeout: 1000,
+});
+
+export type BackEndContext = {
+  getUserMe: (token: string) => Promise<UserData>;
+  signIn: (stakeAddress: string, signature: string) => Promise<string>;
+  signUp: (
+    userType: "student" | "teacher" | "organizer",
+    email: string,
+    stakeAddress: string,
+    signature: string
+  ) => Promise<void>;
+  createOrganization: (
+    type: "groups" | "individual",
+    idenitifer: string,
     name: string,
     description: string,
-    daysToComplete: number,
-    userRewards: number,
-    studentRewards: StudentReward[]
+    studentsPassword: string,
+    teachersPassword: string,
+    areas: string[]
   ) => Promise<void>;
-  signIn: (
-    stakeAddress: string,
-    signatureKey: string,
-    signaturePayload: string
-  ) => Promise<UserData>;
-  signUp: (
-    stakeAddress: string,
-    signatureKey: string,
-    signaturePayload: string,
-    username: string,
-    email: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
-  registerInOrganization: (
+  getOrganization: (organizationId: string) => Promise<OrganizationData>;
+  joinOrganization: (organizationId: string, password: string) => Promise<void>;
+  createGroup: (
     organizationId: string,
-    role: string
+    groupId: string,
+    name: string,
+    area: string,
+    leaderReward: string,
+    members: string[]
+  ) => Promise<void>;
+  acceptGroup: (organizationId: string, groupId: string) => Promise<void>;
+  rejectGroup: (organizationId: string, groupId: string) => Promise<void>;
+  leaveGroup: (organizationId: string, groupId: string) => Promise<void>;
+  createTask: (
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string,
+    deadline: Date
+  ) => Promise<void>;
+  getTask: (organizationId: string, taskId: string) => Promise<TaskData>;
+  approveStartTask: (organizationId: string, taskId: string) => Promise<void>;
+  rejectStartTask: (organizationId: string, taskId: string) => Promise<void>;
+  submitTask: (
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string
+  ) => Promise<void>;
+  submissionApproveTask: (
+    organizationId: string,
+    taskId: string
+  ) => Promise<void>;
+  submissionRejectTask: (
+    organizationId: string,
+    taskId: string,
+    description: string
+  ) => Promise<void>;
+  submissionReviewTask: (
+    organizationId: string,
+    taskId: string,
+    description: string
   ) => Promise<void>;
 };
 
@@ -68,194 +87,232 @@ type BackEndProviderProps = {
 export const BackEnd = createContext<BackEndContext | null>(null);
 
 export const BackEndProvider = ({ children }: BackEndProviderProps) => {
-  const waitForDelay = (delay: number) => {
-    return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, delay);
+  const getUserMe = async (token: string) => {
+    const response = await api.get("/users/me", {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
     });
-  };
-
-  const getUserInformation = async (username: string) => {
-    await waitForDelay(500);
-
-    return userDataSample;
-  };
-
-  const getUserRole = async (username: string) => {
-    await waitForDelay(500);
-
-    return "coordinator";
-  };
-
-  const getTaskInformation = async (taskId: string) => {
-    await waitForDelay(500);
-
-    const tasksString = localStorage.getItem("@tasks");
-    const tasks: TaskData[] =
-      tasksString === null ? [] : JSON.parse(tasksString);
-
-    const specificTask = tasks.reduce((acc, task) =>
-      task.projectId === taskId ? task : acc
-    );
-
-    return specificTask;
-  };
-
-  const getTaskList = async (
-    organizationId: string,
-    page: number,
-    count: number
-  ) => {
-    await waitForDelay(500);
-
-    const fullTasksString = localStorage.getItem("@tasks");
-    const fullTasks =
-      fullTasksString === null ? [] : JSON.parse(fullTasksString);
-
-    const tasks = fullTasks.slice((page - 1) * count, page * count);
-    if (tasks.length === 0) {
-      console.error("Tried to get tasks for page that does not exist");
-
-      return {
-        elements: [],
-        currentPage: page,
-        maxPage: ~~((tasks.length - 1) / count) + 1,
-      };
-    }
 
     return {
-      elements: tasks as TaskData[],
-      currentPage: page,
-      maxPage: ~~((tasks.length - 1) / count) + 1,
+      userType: response.data.type,
+      email: response.data.email,
+      stakeAddress: response.data.stake_address,
+      token: token,
     };
   };
 
-  const createTask = async (
-    user: UserData,
-    signature: string,
-    name: string,
-    description: string,
-    daysToComplete: number,
-    userRewards: number,
-    studentRewards: StudentReward[]
-  ) => {
-    await waitForDelay(500);
+  const signIn = async (stakeAddress: string, signature: string) => {
+    const form = new FormData();
+    form.append("username", stakeAddress);
+    form.append("password", signature);
 
-    const tasksString = localStorage.getItem("@tasks");
-    const tasks = tasksString === null ? [] : JSON.parse(tasksString);
+    const response = await api.post("/token", form);
 
-    localStorage.setItem(
-      "@tasks",
-      JSON.stringify([
-        ...tasks,
-        {
-          projectId: uuidv4(),
-          name: name,
-          description: description,
-          status: "Awaiting",
-          date: new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-          }).format(new Date()),
-          userAssigned: {
-            username: user.username,
-            email: user.email,
-          },
-        },
-      ])
-    );
-  };
-
-  const getUserList = async (
-    organizationId: string,
-    page: number,
-    count: number
-  ) => {
-    await waitForDelay(500);
-
-    const users = userListSample.slice((page - 1) * count, page * count);
-    if (users.length === 0) {
-      console.error("Tried to get users for page that does not exist");
-
-      return {
-        elements: [],
-        currentPage: page,
-        maxPage: ~~((users.length - 1) / count) + 1,
-      };
-    }
-
-    return {
-      elements: users,
-      currentPage: page,
-      maxPage: ~~((users.length - 1) / count) + 1,
-    };
-  };
-
-  const getTaskListAssignedUser = async (
-    username: string,
-    organizationId: string,
-    page: number,
-    count: number
-  ) => {
-    await waitForDelay(500);
-
-    const tasks = taskListSample.slice((page - 1) * count, page * count);
-    if (tasks.length === 0) {
-      console.error("Tried to get tasks for page that does not exist");
-
-      return {
-        elements: [],
-        currentPage: page,
-        maxPage: ~~((tasks.length - 1) / count) + 1,
-      };
-    }
-
-    return {
-      elements: tasks as TaskData[],
-      currentPage: page,
-      maxPage: ~~((tasks.length - 1) / count) + 1,
-    };
-  };
-
-  const getTaskSubmissionHistory = async (taskId: string) => {
-    await waitForDelay(500);
-
-    return submissionHistorySample as SubmissionEventData[];
-  };
-
-  const signIn = async (stakeAddress: string, signedMessage: string) => {
-    await waitForDelay(500);
-
-    // Should sign the message "Signing in at Athena at <time> with code <uuid>"
-    // Backend will make sure code is unique and time is within the limits
-
-    return userDataSample;
+    return response.data["access_token"];
   };
 
   const signUp = async (
-    stakeAddress: string,
-    signatureKey: string,
-    signaturePayload: string,
-    username: string,
+    userType: "student" | "teacher" | "organizer",
     email: string,
-    firstName: string,
-    lastName: string
+    stakeAddress: string,
+    signature: string
   ) => {
-    await waitForDelay(500);
-
-    // Should sign the message "Signing up at Athena at <time> with code <uuid>"
-    // Backend will make sure code is unique and time is within the limits
+    const response = await api.post("/users/register", {
+      user_type: userType,
+      email: email,
+      stake_address: stakeAddress,
+      signature: signature,
+    });
 
     return;
   };
 
-  const registerInOrganization = async (
-    organizationId: string,
-    role: string
+  const createOrganization = async (
+    type: "groups" | "individual",
+    idenitifer: string,
+    name: string,
+    description: string,
+    studentsPassword: string,
+    teachersPassword: string,
+    areas: string[]
   ) => {
-    await waitForDelay(500);
+    await api.post("/organization/create", {
+      organization_type: type,
+      identifier: idenitifer,
+      name: name,
+      description: description,
+      students_password: studentsPassword,
+      teachers_password: teachersPassword,
+      areas: areas,
+    });
+  };
+
+  const getOrganization = async (organizationId: string) => {
+    const response = await api.get(`/organization/${organizationId}`);
+
+    return {
+      ...response.data,
+      creationDate: new Date(response.data.creation_date),
+    };
+  };
+
+  const joinOrganization = async (organizationId: string, password: string) => {
+    await api.post(`/organization/${organizationId}/join`, {
+      password: password,
+    });
+
+    return;
+  };
+
+  const createGroup = async (
+    organizationId: string,
+    identifier: string,
+    name: string,
+    area: string,
+    leaderReward: string,
+    members: string[]
+  ) => {
+    await api.post(`/organization/${organizationId}/group/create`, {
+      identifier: identifier,
+      name: name,
+      area: area,
+      leader_reward: leaderReward,
+      members: members,
+    });
+
+    return;
+  };
+
+  const acceptGroup = async (organizationId: string, groupId: string) => {
+    await api.post(`/organization/${organizationId}/group/${groupId}/accept`);
+
+    return;
+  };
+
+  const rejectGroup = async (organizationId: string, groupId: string) => {
+    await api.post(`/organization/${organizationId}/group/${groupId}/reject`);
+
+    return;
+  };
+
+  const leaveGroup = async (organizationId: string, groupId: string) => {
+    await api.post(`/organization/${organizationId}/group/${groupId}/leave`);
+
+    return;
+  };
+
+  const createTask = async (
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string,
+    deadline: Date
+  ) => {
+    await api.post(`/organization/${organizationId}/group/task/create`, {
+      identifier: taskId,
+      name: name,
+      description: description,
+      deadline: deadline.toISOString(),
+    });
+
+    return;
+  };
+
+  const getTask = async (organizationId: string, taskId: string) => {
+    const response = await api.get(
+      `/organization/${organizationId}/task/${taskId}`
+    );
+
+    let status = "Awaiting";
+    if (response.data.is_approved_completed) {
+      status = "Approved";
+    } else if (
+      response.data.is_rejected_completed ||
+      response.data.is_rejected_start
+    ) {
+      status = "Rejected";
+    } else if (response.data.is_approved_start) {
+      status = "Progress";
+    }
+
+    return {
+      ...response.data,
+      deadline: new Date(response.data.deadline),
+      status: status,
+    };
+  };
+
+  const approveStartTask = async (organizationId: string, taskId: string) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/start/approve`
+    );
+
+    return;
+  };
+
+  const rejectStartTask = async (organizationId: string, taskId: string) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/start/reject`
+    );
+
+    return;
+  };
+
+  const submitTask = async (
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/start/reject`,
+      {
+        name: name,
+        description: description,
+      }
+    );
+
+    return;
+  };
+
+  const submissionApproveTask = async (
+    organizationId: string,
+    taskId: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/submission/approve`
+    );
+
+    return;
+  };
+
+  const submissionRejectTask = async (
+    organizationId: string,
+    taskId: string,
+    description: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/submission/reject`,
+      {
+        description: description,
+      }
+    );
+
+    return;
+  };
+
+  const submissionReviewTask = async (
+    organizationId: string,
+    taskId: string,
+    description: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/submission/review`,
+      {
+        description: description,
+      }
+    );
 
     return;
   };
@@ -263,17 +320,24 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   return (
     <BackEnd.Provider
       value={{
-        getUserInformation,
-        getUserRole,
-        getTaskInformation,
-        getTaskList,
-        createTask,
-        getUserList,
-        getTaskListAssignedUser,
-        getTaskSubmissionHistory,
+        getUserMe,
         signIn,
         signUp,
-        registerInOrganization,
+        createOrganization,
+        getOrganization,
+        joinOrganization,
+        createGroup,
+        acceptGroup,
+        rejectGroup,
+        leaveGroup,
+        createTask,
+        getTask,
+        approveStartTask,
+        rejectStartTask,
+        submitTask,
+        submissionApproveTask,
+        submissionRejectTask,
+        submissionReviewTask,
       }}
     >
       {children}

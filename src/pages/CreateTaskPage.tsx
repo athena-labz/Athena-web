@@ -86,15 +86,15 @@ const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
       return Promise.reject("User not signed in");
     }
 
-    backEnd.createTask(
-      user,
-      "signature",
-      name,
-      description,
-      daysToCompletion,
-      userRewards,
-      studentsRewards
-    );
+    // backEnd.createTask(
+    //   user,
+    //   "signature",
+    //   name,
+    //   description,
+    //   daysToCompletion,
+    //   userRewards,
+    //   studentsRewards
+    // );
   };
 
   return (

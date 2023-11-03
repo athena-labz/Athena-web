@@ -1,45 +1,26 @@
 import { useState, useEffect, ReactNode } from "react";
 
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 
 import { WalletSelector } from "./WalletSelector";
-import { Modal } from "./Modal";
-import { useWallet } from "../contexts/WalletProvider";
-import { useUser } from "../contexts/UserProvider";
+import { FullWallet, useWallet } from "../contexts/WalletProvider";
 
-type SignInHandlerProps = {
+type WalletHandlerProps = {
   whitelistedWallets: Array<string>;
-  onSignIn: () => void;
+  onConnect: () => void;
   className: string;
-  children: ReactNode
+  children: ReactNode;
 };
 
-export const SignInHandler = ({
+export const WalletHandler = ({
   whitelistedWallets,
-  onSignIn,
+  onConnect,
   className,
-  children
-}: SignInHandlerProps) => {
+  children,
+}: WalletHandlerProps) => {
   const [walletSelectorShow, setWalletSelectorShow] = useState(false);
-  const [walletConnected, setWalletConnected] = useState(false);
 
-  const { connect, currentWallet } = useWallet()!;
-  const { signIn } = useUser()!;
-
-  useEffect(() => {
-    if (currentWallet !== null && walletConnected) {
-      setWalletConnected(false);
-
-      signIn()
-        .then(() => {
-          toast.success("Successfully signed in!");
-          onSignIn();
-        })
-        .catch((error) => {
-          toast.error(error);
-        });
-    }
-  }, [currentWallet, walletConnected]);
+  const { connect } = useWallet()!;
 
   return (
     <div>
@@ -56,9 +37,16 @@ export const SignInHandler = ({
 
           connect(wallet)
             .then(() => {
-              setWalletConnected(true);
+              if (wallet === null) {
+                console.error("Got null wallet from connection");
+                toast.error("Something went wrong while connecting to wallet!");
+              } else {
+                toast.success("Successfully connected wallet!");
+                onConnect()
+              }
             })
             .catch((error: any) => {
+              console.error("Oops!");
               if (error === undefined || error === null)
                 toast.error("User denied access to wallet");
               else if (

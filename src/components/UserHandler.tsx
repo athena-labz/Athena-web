@@ -10,12 +10,11 @@ import { SignInHandler } from "./SignInHandler";
 const whitelistedWallets = ["eternl", "nami"];
 
 type SelectorProps = {
-  username: string;
   email: string;
   stakeAddress: string;
 };
 
-const Selector = ({ username, email, stakeAddress }: SelectorProps) => {
+const Selector = ({ email, stakeAddress }: SelectorProps) => {
   const [optionSelected, setOptionSelected] = useState<
     "wallet" | "email" | "username"
   >("email");
@@ -38,19 +37,6 @@ const Selector = ({ username, email, stakeAddress }: SelectorProps) => {
           />
         </div>
         <div
-          onClick={() => setOptionSelected("username")}
-          className={`${
-            optionSelected === "username" ? "bg-slate-500" : ""
-          } rounded-full border-slate-500 border p-1 hover:cursor-pointer`}
-        >
-          <img
-            className="h-4"
-            src={`/assets/person_profile${
-              optionSelected === "username" ? "_selected" : ""
-            }.svg`}
-          />
-        </div>
-        <div
           onClick={() => setOptionSelected("wallet")}
           className={`${
             optionSelected === "wallet" ? "bg-slate-500" : ""
@@ -66,8 +52,6 @@ const Selector = ({ username, email, stakeAddress }: SelectorProps) => {
       </div>
       {optionSelected === "email" ? (
         <span className="text-slate-500">{email}</span>
-      ) : optionSelected === "username" ? (
-        <span className="text-slate-500">{username}</span>
       ) : (
         <span
           onClick={() => setStakeAddressAbbreviated(!stakeAddressAbbreviated)}
@@ -95,7 +79,9 @@ export const UserHandler = ({}: UserHandlerProps) => {
           whitelistedWallets={whitelistedWallets}
           onSignIn={() => {}}
           className="py-2 px-8 rounded-full bg-white text-dark-blue text-normal md:text-lg font-bold"
-        />
+        >
+          Sign In
+        </SignInHandler>
         <button
           onClick={() => navigate("/signup")}
           className="py-2 px-8 rounded-full bg-dark-blue text-normal text-white md:text-lg font-bold"
@@ -108,7 +94,6 @@ export const UserHandler = ({}: UserHandlerProps) => {
     return (
       <div className="flex flex-row gap-4 justify-between items-center w-80 bg-white p-2 px-4 rounded-lg">
         <Selector
-          username={user.user!.username}
           email={user.user!.email}
           stakeAddress={user.user!.stakeAddress}
         />

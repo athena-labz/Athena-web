@@ -1,7 +1,16 @@
 import * as React from "react";
 
 import { createContext, useState, useContext, useEffect } from "react";
-import { C, Lucid, Blockfrost, WalletApi, Cardano, SignedMessage } from "lucid-cardano";
+import {
+  C,
+  Lucid,
+  Blockfrost,
+  WalletApi,
+  Cardano,
+  SignedMessage,
+  M
+} from "lucid-cardano";
+
 
 window.cardano = window.cardano || {};
 
@@ -104,6 +113,7 @@ export const WalletProvider = ({
   const updateCurrentFullWallet = async (wallet: string | null) => {
     const currentFullWallet = await getCurrentWallet(wallet);
     setCurrentFullWallet(currentFullWallet);
+    return Promise.resolve(currentFullWallet);
   };
 
   const getCurrentWallet = async (wallet: string | null) => {
@@ -167,10 +177,9 @@ export const WalletProvider = ({
       return Promise.reject("Selected wallet does not have stake address");
     }
 
-    const signedMessage = await lucid!.newMessage(
-      address,
-      toHex(Buffer.from(message, "utf8"))
-    ).sign();
+    const signedMessage = await lucid!
+      .newMessage(address, toHex(Buffer.from(message, "utf8")))
+      .sign();
 
     return signedMessage;
   };
@@ -183,7 +192,7 @@ export const WalletProvider = ({
         getWallets: () => wallets,
         connect,
         getStakeAddress,
-        signMessage
+        signMessage,
       }}
     >
       {children}
