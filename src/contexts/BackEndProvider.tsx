@@ -33,6 +33,7 @@ export type BackEndContext = {
     signature: string
   ) => Promise<void>;
   createOrganization: (
+    token: string,
     type: "groups" | "individual",
     idenitifer: string,
     name: string,
@@ -42,7 +43,7 @@ export type BackEndContext = {
     areas: string[]
   ) => Promise<void>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
-  joinOrganization: (organizationId: string, password: string) => Promise<void>;
+  joinOrganization: (token: string, organizationId: string, password: string) => Promise<void>;
   createGroup: (
     organizationId: string,
     groupId: string,
@@ -172,6 +173,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const createOrganization = async (
+    token: string,
     type: "groups" | "individual",
     idenitifer: string,
     name: string,
@@ -180,15 +182,23 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     teachersPassword: string,
     areas: string[]
   ) => {
-    await api.post("/organization/create", {
-      organization_type: type,
-      identifier: idenitifer,
-      name: name,
-      description: description,
-      students_password: studentsPassword,
-      teachers_password: teachersPassword,
-      areas: areas,
-    });
+    await api.post(
+      "/organization/create",
+      {
+        organization_type: type,
+        identifier: idenitifer,
+        name: name,
+        description: description,
+        students_password: studentsPassword,
+        teachers_password: teachersPassword,
+        areas: areas,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
   };
 
   const getOrganization = async (organizationId: string) => {
@@ -200,10 +210,22 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
-  const joinOrganization = async (organizationId: string, password: string) => {
-    await api.post(`/organization/${organizationId}/join`, {
-      password: password,
-    });
+  const joinOrganization = async (
+    token: string,
+    organizationId: string,
+    password: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/join`,
+      {
+        password: password,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
