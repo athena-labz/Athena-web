@@ -82,7 +82,10 @@ const SignUpForm = ({ wallet, user }: SignUpFormProps) => {
             Sign Up
           </WalletHandler>
         </div>
-        <span className="text-base text-slate-400 hover:cursor-pointer hover:opacity-75">
+        <span
+          onClick={() => navigate("/")}
+          className="text-base text-slate-400 hover:cursor-pointer hover:opacity-75"
+        >
           Already have an account?
         </span>
       </div>

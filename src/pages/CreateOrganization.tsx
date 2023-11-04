@@ -99,7 +99,7 @@ const CreateOrganizationForm = () => {
             />
           </div>
           <div className="flex flex-col gap-2 w-full">
-            <span>What is a good unique identifier name?</span>
+            <span>What is a good unique id name?</span>
             <input
               className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
               placeholder="awesome_project_2023"

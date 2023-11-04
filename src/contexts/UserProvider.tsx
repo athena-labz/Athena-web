@@ -122,9 +122,14 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       toast.success("Signed in successfully!");
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Login failed! Make sure you have a valid account.");
+      
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        toast.error("Server error while trying to sign in");
+      }
 
       return false;
     }
@@ -163,15 +168,19 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           });
 
           return true;
-        } catch (error) {
-          console.error(error);
-          toast.error("Server error while trying to sign in");
+        } catch (error: any) {
+          if (error?.response?.data?.detail) {
+            toast.error(`Server error: ${error.response.data.detail}`);
+          } else {
+            toast.error("Server error while trying to sign in");
+          }
         }
-      } catch (error) {
-        console.error(error);
-        toast.error(
-          "Register failed! Make sure you have the right information."
-        );
+      } catch (error: any) {
+        if (error?.response?.data?.detail) {
+          toast.error(`Server error: ${error.response.data.detail}`);
+        } else {
+          toast.error("Server error while trying to sign up");
+        }
       }
     } catch (error) {
       console.error(error);

@@ -48,6 +48,7 @@ type ListResponse<T> = {
 
 type NFTListData = ListResponse<NFTData>;
 type TaskListData = ListResponse<TaskData>;
+type OrganizationListData = ListResponse<OrganizationData>;
 type UserListData = ListResponse<UserOrganizationData>;
 
 type StudentReward = {

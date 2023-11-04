@@ -43,7 +43,17 @@ export type BackEndContext = {
     areas: string[]
   ) => Promise<void>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
-  joinOrganization: (token: string, organizationId: string, password: string) => Promise<void>;
+  getUserOrganizations: (
+    token: string,
+    page: number,
+    count: number
+  ) => Promise<OrganizationListData>;
+  joinOrganization: (
+    token: string,
+    organizationId: string,
+    area: string | null,
+    password: string
+  ) => Promise<void>;
   createGroup: (
     organizationId: string,
     groupId: string,
@@ -210,15 +220,43 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
+  const getUserOrganizations = async (
+    token: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/users/me/organizations?page=${page}&count=${count}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.organizations.filter((organization: any) => {
+        return {
+          ...organization,
+          creationDate: new Date(organization.creation_date),
+        };
+      }),
+    };
+  };
+
   const joinOrganization = async (
     token: string,
     organizationId: string,
+    area: string | null,
     password: string
   ) => {
     await api.post(
       `/organization/${organizationId}/join`,
       {
         password: password,
+        area: area,
       },
       {
         headers: {
@@ -391,6 +429,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         signUp,
         createOrganization,
         getOrganization,
+        getUserOrganizations,
         joinOrganization,
         createGroup,
         acceptGroup,

@@ -71,7 +71,7 @@ const Home = () => {
                 <div className="flex flex-wrap justify-center items-center gap-6">
                   <button
                     className="bg-white py-4 w-72 rounded-lg text-dark-blue text-2xl font-bold"
-                    onClick={() => navigate("/organization/beep")}
+                    onClick={() => navigate("/organization/select")}
                   >
                     Enter organization
                   </button>

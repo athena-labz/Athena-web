@@ -12,6 +12,7 @@ import CreateOrganization from "./pages/CreateOrganization";
 import UsersPage from "./pages/UsersPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
+import OrganizationSelect from "./pages/OrganizationSelect";
 import OrganizationPage from "./pages/OrganizationPage";
 import SpecificTaskPage from "./pages/SpecficTaskPage";
 import TasksPage from "./pages/TasksPage";
@@ -26,6 +27,7 @@ import { UserProvider } from "./contexts/UserProvider";
 
 import "react-toastify/dist/ReactToastify.css";
 import CreateTaskPage from "./pages/CreateTaskPage";
+import OrganizationJoin from "./pages/OrganizationJoin";
 
 const RedirectToTasks = () => {
   const { organization } = useParams<{ organization: string }>();
@@ -33,7 +35,7 @@ const RedirectToTasks = () => {
   return <Navigate to={`/organization/${organization}/tasks`} replace />;
 };
 
-type SpecificTaskRedirectParams = { organizationId: string, taskId: string };
+type SpecificTaskRedirectParams = { organizationId: string; taskId: string };
 
 const SpecificTaskRedirect = () => {
   const { organizationId, taskId } = useParams<SpecificTaskRedirectParams>();
@@ -136,6 +138,24 @@ function App() {
               element={
                 <ProtectedRoute>
                   <CreateOrganization />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/organization/select"
+              element={
+                <ProtectedRoute>
+                  <OrganizationSelect />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/organization/join"
+              element={
+                <ProtectedRoute>
+                  <OrganizationJoin />
                 </ProtectedRoute>
               }
             />
