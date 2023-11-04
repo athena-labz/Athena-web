@@ -41,7 +41,6 @@ export const WalletHandler = ({
                 console.error("Got null wallet from connection");
                 toast.error("Something went wrong while connecting to wallet!");
               } else {
-                toast.success("Successfully connected wallet!");
                 onConnect()
               }
             })

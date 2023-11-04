@@ -33,10 +33,12 @@ const RedirectToTasks = () => {
   return <Navigate to={`/organization/${organization}/tasks`} replace />;
 };
 
-type SpecificTaskRedirectParams = { taskId: string };
+type SpecificTaskRedirectParams = { organizationId: string, taskId: string };
 
 const SpecificTaskRedirect = () => {
-  const { taskId } = useParams<SpecificTaskRedirectParams>();
+  const { organizationId, taskId } = useParams<SpecificTaskRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
 
   if (!taskId) {
     return <RedirectToTasks />;
@@ -44,7 +46,7 @@ const SpecificTaskRedirect = () => {
 
   return (
     <OrganizationPage currentSelection="tasks">
-      <SpecificTaskPage taskId={taskId} />
+      <SpecificTaskPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
 };
@@ -167,7 +169,7 @@ function App() {
               />
 
               <Route
-                path="/organization/:organization/tasks/:taskId"
+                path="/organization/:organizationId/tasks/:taskId"
                 element={
                   <ProtectedRoute>
                     <SpecificTaskRedirect />

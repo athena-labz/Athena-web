@@ -21,9 +21,10 @@ const TasksPage = ({ organization }: TasksPageProps) => {
   }, []);
 
   const loadTasks = async (page: number) => {
-    const taskList = await backEnd.getTaskList(organization, page, 10);
+      // TODO
+    // const taskList = await backEnd.getTaskList(organization, page, 10);
 
-    setTasksList(taskList);
+    // setTasksList(taskList);
   };
 
   return (
@@ -57,9 +58,9 @@ const TasksPage = ({ organization }: TasksPageProps) => {
 
         {tasksList &&
           tasksList.elements.map(
-            ({ projectId, name, description, status, date }) => (
+            ({ identifier, name, description, status, date }) => (
               <ProjectCard
-                projectId={projectId}
+                projectId={identifier}
                 name={name}
                 description={description}
                 status={status as TaskStatus}

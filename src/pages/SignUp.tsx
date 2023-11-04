@@ -34,7 +34,8 @@ const SignUpForm = ({ wallet, user }: SignUpFormProps) => {
   }, [waitForSignUp, wallet.currentWallet]);
 
   const signUp = async () => {
-    await user.signUp(userType, email);
+    const success = await user.signUp(userType, email);
+    if (success) navigate("/");
   };
 
   return (

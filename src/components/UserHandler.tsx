@@ -70,9 +70,9 @@ type UserHandlerProps = {};
 
 export const UserHandler = ({}: UserHandlerProps) => {
   const navigate = useNavigate();
-  const user = useUser()!;
+  const { user, signOut } = useUser()!;
 
-  if (!user.isUserSignedIn) {
+  if (user === null) {
     return (
       <div className="flex flex-row gap-4 items-center">
         <SignInHandler
@@ -93,11 +93,18 @@ export const UserHandler = ({}: UserHandlerProps) => {
   } else {
     return (
       <div className="flex flex-row gap-4 justify-between items-center w-80 bg-white p-2 px-4 rounded-lg">
-        <Selector
-          email={user.user!.email}
-          stakeAddress={user.user!.stakeAddress}
+        <div className="flex flex-row justify-between gap-2">
+          <Avatar email={user.email} className="h-12 rounded-full" />
+          <Selector
+            email={user.email}
+            stakeAddress={user.stakeAddress}
+          />
+        </div>
+        <img
+          className="h-8 hover:cursor-pointer"
+          src={`/assets/logout.svg`}
+          onClick={() => signOut()}
         />
-        <Avatar email={user.user!.email} className="h-12 rounded-full" />
       </div>
     );
   }

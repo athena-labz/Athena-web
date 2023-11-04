@@ -33,7 +33,6 @@ const TaskContent = ({
   name,
   description,
   date,
-  userAssigned,
 }: TaskContentProps) => (
   <div className="flex h-full items-start col-span-2">
     <div className="flex flex-col w-full gap-4 bg-white rounded-lg p-8">
@@ -43,16 +42,6 @@ const TaskContent = ({
       <span className="text-justify">{description}</span>
       <hr />
       <div className="flex flex-row justify-between items-center">
-        {userAssigned && (
-          <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
-            <span>Assigned to</span>
-            <div className="flex flex-row justify-start items-center gap-1 hover:text-slate-600 hover:cursor-pointer">
-              <Avatar email={userAssigned.email} className="w-4 rounded-full" />
-              <span className="">{userAssigned.username}</span>
-            </div>
-          </div>
-        )}
-
         <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
           <span>{date}</span>
         </div>
@@ -62,10 +51,11 @@ const TaskContent = ({
 );
 
 type SpecificTaskPageProps = {
+  organizationId: string;
   taskId: string;
 };
 
-const SpecificTaskPage = ({ taskId }: SpecificTaskPageProps) => {
+const SpecificTaskPage = ({ organizationId, taskId }: SpecificTaskPageProps) => {
   const [taskData, setTaskData] = useState<TaskData | null>(null);
   const [submissionHistory, setSubmissionHistory] = useState<
     SubmissionEventData[] | null
@@ -78,13 +68,13 @@ const SpecificTaskPage = ({ taskId }: SpecificTaskPageProps) => {
   }, []);
 
   const loadTaskInformation = async () => {
-    backEnd.getTaskInformation(taskId).then((taskData) => {
+    backEnd.getTask(organizationId, taskId).then((taskData) => {
       setTaskData(taskData);
     });
 
-    backEnd.getTaskSubmissionHistory(taskId).then((submissionHistory) => {
-      setSubmissionHistory(submissionHistory);
-    });
+    // backEnd.getTaskSubmissionHistory(taskId).then((submissionHistory) => {
+    //   setSubmissionHistory(submissionHistory);
+    // });
   };
 
   return (
@@ -101,7 +91,6 @@ const SpecificTaskPage = ({ taskId }: SpecificTaskPageProps) => {
             name={taskData.name}
             description={taskData.description}
             date={taskData.date}
-            userAssigned={taskData.userAssigned}
           />
 
           <div className="flex h-full items-start">

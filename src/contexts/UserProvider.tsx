@@ -10,17 +10,18 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { jwtDecode } from "jwt-decode";
+import { SignedMessage } from "lucid-cardano";
 
 export type UserContext = {
   isLoaded: boolean;
   isUserSignedIn: boolean;
   user: UserData | null;
-  signIn: () => Promise<void>;
+  signIn: () => Promise<boolean>;
   signUp: (
     userType: "student" | "teacher" | "organizer",
     email: string
-  ) => Promise<void>;
-  logOut: () => void;
+  ) => Promise<boolean>;
+  signOut: () => void;
 };
 
 type UserProviderProps = {
@@ -29,11 +30,18 @@ type UserProviderProps = {
 
 export const User = createContext<UserContext | null>(null);
 
+type StoredSignature = {
+  stakeAddress: string;
+  signature: SignedMessage;
+  expire: number;
+};
+
 export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const navigate = useNavigate();
+  const [signature, setSignature] = useState<StoredSignature | null>(null);
 
   const backEnd = useBackEnd()!;
   const wallet = useWallet()!;
@@ -41,6 +49,37 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   useEffect(() => {
     retrieveUser();
   }, []);
+
+  useEffect(() => {
+    if (user !== null) setIsSignedIn(true);
+    else setIsSignedIn(false);
+  }, [user]);
+
+  const getSignature = async () => {
+    const currentDate = Math.floor(Date.now() / 1000);
+    const stakeAddress = await wallet.getStakeAddress();
+
+    if (signature && signature.stakeAddress === stakeAddress) {
+      if (currentDate > signature.expire) {
+        setSignature(null);
+      } else {
+        return signature;
+      }
+    }
+
+    const signedMessage = await wallet.signMessage(
+      `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${currentDate}`
+    );
+
+    const sig = {
+      stakeAddress: stakeAddress,
+      signature: signedMessage,
+      expire: currentDate + 30 * 60 * 60,
+    };
+
+    setSignature(sig);
+    return sig;
+  };
 
   const retrieveUser = () => {
     const currentUser = localStorage.getItem("@user");
@@ -60,33 +99,34 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     setUser(user);
   };
 
-  const logOut = () => {
+  const signOut = () => {
     localStorage.removeItem("@user");
     setUser(null);
+    setSignature(null);
   };
 
   const signIn = async () => {
-    const stakeAddress = await wallet.getStakeAddress();
-    const signedMessage = await wallet.signMessage(
-      `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${Math.floor(
-        Date.now() / 1000
-      )}`
-    );
+    const signature = await getSignature();
 
     try {
       const token = await backEnd.signIn(
-        stakeAddress,
-        signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
+        signature.stakeAddress,
+        signature.signature.key +
+          "H1+DFJCghAmokzYG" +
+          signature.signature.signature
       );
 
-      const user = await backEnd.getUserMe(token);
+      const user = await backEnd.getUserInformation(token);
 
       saveUser(user);
       toast.success("Signed in successfully!");
+
+      return true;
     } catch (error) {
       console.error(error);
       toast.error("Login failed! Make sure you have a valid account.");
-      Promise.reject(error);
+
+      return false;
     }
   };
 
@@ -94,43 +134,51 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     userType: "student" | "teacher" | "organizer",
     email: string
   ) => {
-    const stakeAddress = await wallet.getStakeAddress();
+    const signature = await getSignature();
 
     try {
-      const signedMessage = await wallet.signMessage(
-        `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${Math.floor(
-          Date.now() / 1000
-        )}`
-      );
-
       try {
         await backEnd.signUp(
           userType,
           email,
-          stakeAddress,
-          signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
+          signature.stakeAddress,
+          signature.signature.key +
+            "H1+DFJCghAmokzYG" +
+            signature.signature.signature
         );
+
+        try {
+          const token = await backEnd.signIn(
+            signature.stakeAddress,
+            signature.signature.key +
+              "H1+DFJCghAmokzYG" +
+              signature.signature.signature
+          );
+
+          saveUser({
+            userType: userType,
+            email: email,
+            stakeAddress: signature.stakeAddress,
+            token: token,
+          });
+
+          return true;
+        } catch (error) {
+          console.error(error);
+          toast.error("Server error while trying to sign in");
+        }
       } catch (error) {
         console.error(error);
         toast.error(
           "Register failed! Make sure you have the right information."
         );
       }
-
-      try {
-        const token = await backEnd.signIn(
-          stakeAddress,
-          signedMessage.key + "H1+DFJCghAmokzYG" + signedMessage.signature
-        );
-        console.log(token);
-      } catch (error) {
-        console.error(error);
-        toast.error("Server error while trying to sign in");
-      }
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong while signing the message");
     }
+
+    return false;
   };
 
   return (
@@ -138,10 +186,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       value={{
         isLoaded,
         user,
-        isUserSignedIn: user !== null,
+        isUserSignedIn: isSignedIn,
         signIn,
         signUp,
-        logOut,
+        signOut,
       }}
     >
       {children}

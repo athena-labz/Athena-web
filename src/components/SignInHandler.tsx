@@ -11,14 +11,14 @@ type SignInHandlerProps = {
   whitelistedWallets: Array<string>;
   onSignIn: () => void;
   className: string;
-  children: ReactNode
+  children: ReactNode;
 };
 
 export const SignInHandler = ({
   whitelistedWallets,
   onSignIn,
   className,
-  children
+  children,
 }: SignInHandlerProps) => {
   const [walletSelectorShow, setWalletSelectorShow] = useState(false);
   const [walletConnected, setWalletConnected] = useState(false);
@@ -30,14 +30,9 @@ export const SignInHandler = ({
     if (currentWallet !== null && walletConnected) {
       setWalletConnected(false);
 
-      signIn()
-        .then(() => {
-          toast.success("Successfully signed in!");
-          onSignIn();
-        })
-        .catch((error) => {
-          toast.error(error);
-        });
+      signIn().then(() => {
+        onSignIn();
+      });
     }
   }, [currentWallet, walletConnected]);
 

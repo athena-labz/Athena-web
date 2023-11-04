@@ -8,10 +8,6 @@ export const taskStatusDisplay = (projectStatus: TaskStatus) => {
       return "In progress";
     }
 
-    case "Review": {
-      return "Awaiting review";
-    }
-
     case "Approved": {
       return "Approved by admins";
     }

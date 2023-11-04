@@ -122,65 +122,27 @@ type ProfilePageProps = {
 
 const ProfilePage = ({ organization, username }: ProfilePageProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userTasks, setUserTasks] = useState<TaskListData | null>(null);
+  const [userTasksPage, setUserTasksPage] = useState<number>(1);
 
-  const [userAssignedTasks, setUserAssignedTasks] =
-    useState<TaskListData | null>(null);
-  const [userAssignedTasksPage, setUserAssignedTasksPage] = useState<number>(1);
-
-  const [userNFTs, setUserNFTs] = useState<NFTListData | null>({
-    currentPage: 1,
-    maxPage: 1,
-    elements: [
-      { nftId: "", name: "Isola Bella", image: "/assets/isola_bella_nft.png" },
-      {
-        nftId: "",
-        name: "Forte di Orino",
-        image: "/assets/forte_di_orino_nft.png",
-      },
-      {
-        nftId: "",
-        name: "The Basilica",
-        image: "/assets/the_basilica_nft.png",
-      },
-    ],
-  });
-  const [userNFTsPage, setUserNFTsPage] = useState<number>(1);
-
-  const { getUserInformation, getTaskListAssignedUser, getUserRole } =
-    useBackEnd()!;
+  const { user } = useUser()!;
+  const { getUserTasks } = useBackEnd()!;
 
   useEffect(() => {
-    updateUserData();
-  }, []);
+    updateUserTasks(userTasksPage);
+  }, [userTasksPage]);
 
   useEffect(() => {
-    updateUserAssignedTasks(userAssignedTasksPage);
-  }, [userAssignedTasksPage]);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
-  const updateUserData = async () => {
-    getUserMe(username).then((userData) => {
-      setUserData(userData);
+  const updateUserTasks = async (page: number) => {
+    setUserTasks(null);
 
-      getUserRole(username).then((role) => {
-        setUserRole(role);
-      });
-    });
-  };
-
-  const updateUserAssignedTasks = async (page: number) => {
-    setUserAssignedTasks(null);
-
-    const assignedTasks = await getTaskListAssignedUser(
-      username,
-      organization,
-      page,
-      3
-    );
-
-    setTimeout(() => {
-      setUserAssignedTasks(assignedTasks);
-    }, 2_000);
+    const assignedTasks = await getUserTasks(username, organization, page, 3);
+    setUserTasks(assignedTasks);
   };
 
   return (
@@ -195,64 +157,9 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
         <div className="w-full flex flex-col gap-8">
           <ProfileContainer
             email={userData.email}
-            username={userData.username}
-            name={`${userData.firstName} ${userData.lastName}`}
-            role={userRole ? userRole : "Role not found"}
+            type={userData.userType}
             stakeAddress={userData.stakeAddress}
           />
-
-          <div className="inline-block">
-            <div className="p-4 mb-4">
-              <h1 className="text-4xl text-slate-600 font-semibold">NFTs</h1>
-            </div>
-
-            {userNFTs === null && (
-              <div className="flex w-full justify-center items-center">
-                <LoadingIcon className="text-blue-500 w-24 h-24" />
-              </div>
-            )}
-
-            {userNFTs && (
-              <div className="flex flex-row gap-8">
-                <div className="flex flex-row gap-4">
-                  {userNFTsPage > 1 && (
-                    <div className="flex items-center">
-                      <img
-                        onClick={() => setUserNFTsPage(userNFTsPage - 1)}
-                        className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
-                        src="/assets/left.svg"
-                      />
-                    </div>
-                  )}
-
-                  {userNFTs.elements.map(({ name, image }) => (
-                    <div className="flex flex-col text-slate-600 gap-2 w-72 p-8 px-12 bg-white rounded-lg text-center justify-center w-full">
-                      <span className="text-lg font-semibold">{name}</span>
-                      <img className="h-48 w-48 p-2 rounded-lg" src={image} />
-
-                      <div className="mt-4">
-                        <button className="p-4 px-12 hover:cursor-pointer gap-2 items-center bg-dark-blue rounded-lg">
-                          <span className="text-white text-lg font-bold">
-                            Claim
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {userNFTsPage < userNFTs.maxPage && (
-                  <div className="flex items-center">
-                    <img
-                      onClick={() => setUserNFTsPage(userNFTsPage + 1)}
-                      className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
-                      src="/assets/right.svg"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
 
           <div className="inline-block">
             <div className="p-4 mb-4">
@@ -261,31 +168,29 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
               </h1>
             </div>
 
-            {userAssignedTasks === null && (
+            {userTasks === null && (
               <div className="flex w-full justify-center items-center">
                 <LoadingIcon className="text-blue-500 w-24 h-24" />
               </div>
             )}
 
-            {userAssignedTasks && (
+            {userTasks && (
               <div className="flex flex-row gap-8">
                 <div className="flex flex-row gap-4">
-                  {userAssignedTasksPage > 1 && (
+                  {userTasksPage > 1 && (
                     <div className="flex items-center">
                       <img
-                        onClick={() =>
-                          setUserAssignedTasksPage(userAssignedTasksPage - 1)
-                        }
+                        onClick={() => setUserTasksPage(userTasksPage - 1)}
                         className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
                         src="/assets/left.svg"
                       />
                     </div>
                   )}
 
-                  {userAssignedTasks.elements.map(
-                    ({ projectId, name, description, status, date }) => (
+                  {userTasks.elements.map(
+                    ({ identifier, name, description, status, date }) => (
                       <ProjectCard
-                        projectId={projectId}
+                        projectId={identifier}
                         name={name}
                         description={description}
                         status={status as TaskStatus}
@@ -295,12 +200,10 @@ const ProfilePage = ({ organization, username }: ProfilePageProps) => {
                   )}
                 </div>
 
-                {userAssignedTasksPage < userAssignedTasks.maxPage && (
+                {userTasksPage < userTasks.maxPage && (
                   <div className="flex items-center">
                     <img
-                      onClick={() =>
-                        setUserAssignedTasksPage(userAssignedTasksPage + 1)
-                      }
+                      onClick={() => setUserTasksPage(userTasksPage + 1)}
                       className="h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer"
                       src="/assets/right.svg"
                     />

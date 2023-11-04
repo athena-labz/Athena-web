@@ -69,7 +69,7 @@ export const TaskStatusContainer = ({
 
       <hr />
 
-      {["Progress", "Review", "Approved", "Rejected"].includes(taskStatus) && (
+      {["Progress", "Approved", "Rejected"].includes(taskStatus) && (
         <SubmissionHistory />
       )}
 
@@ -81,7 +81,7 @@ export const TaskStatusContainer = ({
         </div>
       )}
 
-      {taskStatus === "Review" && userRole === "Admin" && (
+      {taskStatus === "Progress" && userRole === "Admin" && (
         <div className="mt-2">
           <ButtonContainer onClick={() => {}}>Review work</ButtonContainer>
         </div>

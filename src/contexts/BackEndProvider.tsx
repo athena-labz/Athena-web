@@ -18,7 +18,13 @@ const api = axios.create({
 });
 
 export type BackEndContext = {
-  getUserMe: (token: string) => Promise<UserData>;
+  getUserInformation: (token: string) => Promise<UserData>;
+  getUserTasks: (
+    token: string,
+    organizationId: string,
+    page: number,
+    count: number
+  ) => Promise<TaskListData>;
   signIn: (stakeAddress: string, signature: string) => Promise<string>;
   signUp: (
     userType: "student" | "teacher" | "organizer",
@@ -87,7 +93,7 @@ type BackEndProviderProps = {
 export const BackEnd = createContext<BackEndContext | null>(null);
 
 export const BackEndProvider = ({ children }: BackEndProviderProps) => {
-  const getUserMe = async (token: string) => {
+  const getUserInformation = async (token: string) => {
     const response = await api.get("/users/me", {
       headers: {
         Authorization: "Bearer " + token,
@@ -99,6 +105,43 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       email: response.data.email,
       stakeAddress: response.data.stake_address,
       token: token,
+    };
+  };
+
+  const getUserTasks = async (
+    token: string,
+    organizationId: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/users/me/organization/${organizationId}/task?page=${page}&count=${count}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.tasks.filter((task: any) => {
+        let status = "Awaiting";
+        if (task.is_approved_completed) {
+          status = "Approved";
+        } else if (task.is_rejected_completed || task.is_rejected_start) {
+          status = "Rejected";
+        } else if (task.is_approved_start) {
+          status = "Progress";
+        }
+
+        return {
+          ...task,
+          deadline: new Date(task.deadline),
+          status: status,
+        };
+      }),
     };
   };
 
@@ -320,7 +363,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   return (
     <BackEnd.Provider
       value={{
-        getUserMe,
+        getUserInformation,
+        getUserTasks,
         signIn,
         signUp,
         createOrganization,
