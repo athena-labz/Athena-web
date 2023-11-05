@@ -48,7 +48,7 @@ export const WalletSelector = ({
     return <></>
   }
 
-  const wallets = getWallets()!;
+  const wallets = getWallets() ?? {};
   const orderedWallets: WalletInfo[] = [];
   for (let i = 0; i < whitelistedWallets.length; i++) {
     const wallet = whitelistedWallets[i];

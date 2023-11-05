@@ -53,11 +53,11 @@ export const WalletProvider = ({
   const [walletLoaded, setWalletLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    loadCardano();
+    if (window && window.cardano) loadCardano();
   }, []);
 
   useEffect(() => {
-    updateCurrentFullWallet(currentWallet);
+    if (window && window.cardano) updateCurrentFullWallet(currentWallet);
   }, [currentWallet, wallets]);
 
   const loadCardano = async () => {
