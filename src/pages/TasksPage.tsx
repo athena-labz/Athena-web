@@ -4,12 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useBackEnd } from "../contexts/BackEndProvider";
 import { useEffect, useState } from "react";
 import { LoadingIcon } from "../components/LoadingIcon";
+import { toast } from "react-toastify";
 
 type TasksPageProps = {
-  organization: string;
+  organizationId: string;
 };
 
-const TasksPage = ({ organization }: TasksPageProps) => {
+const TasksPage = ({ organizationId }: TasksPageProps) => {
   const [tasksList, setTasksList] = useState<TaskListData | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -21,10 +22,20 @@ const TasksPage = ({ organization }: TasksPageProps) => {
   }, []);
 
   const loadTasks = async (page: number) => {
-      // TODO
-    // const taskList = await backEnd.getTaskList(organization, page, 10);
-
-    // setTasksList(taskList);
+    try {
+      const taskList = await backEnd.getOrganizationTasks(
+        organizationId,
+        page,
+        10
+      );
+      setTasksList(taskList);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        toast.error("Server error while trying to get organization tasks");
+      }
+    }
   };
 
   return (
@@ -34,7 +45,7 @@ const TasksPage = ({ organization }: TasksPageProps) => {
         <div className="flex justify-end">
           <div
             onClick={() =>
-              navigate(`/organization/${organization}/tasks/create`)
+              navigate(`/organization/${organizationId}/tasks/create`)
             }
             className="p-4 mb-4 hover:cursor-pointer flex flex-row gap-2 items-center bg-dark-blue rounded-lg"
           >
@@ -43,7 +54,7 @@ const TasksPage = ({ organization }: TasksPageProps) => {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-4">
         {tasksList === null && (
           <div className="flex w-full justify-center items-center">
             <LoadingIcon className="text-blue-500 w-24 h-24" />
@@ -56,18 +67,53 @@ const TasksPage = ({ organization }: TasksPageProps) => {
           </div>
         )}
 
-        {tasksList &&
-          tasksList.elements.map(
-            ({ identifier, name, description, status, date }) => (
-              <ProjectCard
-                projectId={identifier}
-                name={name}
-                description={description}
-                status={status as TaskStatus}
-                date={date}
-              />
-            )
-          )}
+        {tasksList && tasksList.elements.length > 0 && (
+          <div className="flex flex-col">
+            <div className="flex flex-wrap gap-4">
+              {tasksList.elements.map(
+                ({ identifier, name, description, status, date }) => (
+                  <ProjectCard
+                    projectId={identifier}
+                    name={name}
+                    description={description}
+                    status={status as TaskStatus}
+                    date={date}
+                  />
+                )
+              )}
+            </div>
+
+            <div className="flex flex-row justify-center">
+              <div className="flex items-center">
+                <img
+                  onClick={() =>
+                    currentPage > 1 ? setCurrentPage(currentPage - 1) : null
+                  }
+                  className={`${
+                    currentPage === 1 ? "opacity-75" : ""
+                  } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
+                  src="/assets/left.svg"
+                />
+              </div>
+              <div className="flex items-center">
+                <span className="text-lg text-slate-600">{currentPage}</span>
+              </div>
+              <div className="flex items-center">
+                <img
+                  onClick={() =>
+                    currentPage < tasksList.maxPage
+                      ? setCurrentPage(currentPage + 1)
+                      : null
+                  }
+                  className={`${
+                    currentPage === tasksList.maxPage ? "opacity-75" : ""
+                  } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
+                  src="/assets/right.svg"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

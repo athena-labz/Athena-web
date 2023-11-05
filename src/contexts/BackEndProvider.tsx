@@ -43,6 +43,11 @@ export type BackEndContext = {
     areas: string[]
   ) => Promise<void>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
+  getOrganizationTasks: (
+    organizationId: string,
+    page: number,
+    count: number
+  ) => Promise<TaskListData>;
   getUserOrganizations: (
     token: string,
     page: number,
@@ -55,21 +60,40 @@ export type BackEndContext = {
     password: string
   ) => Promise<void>;
   createGroup: (
+    token: string,
     organizationId: string,
     groupId: string,
     name: string,
-    area: string,
-    leaderReward: string,
     members: string[]
   ) => Promise<void>;
-  acceptGroup: (organizationId: string, groupId: string) => Promise<void>;
-  rejectGroup: (organizationId: string, groupId: string) => Promise<void>;
-  leaveGroup: (organizationId: string, groupId: string) => Promise<void>;
+  getUserGroups: (
+    token: string,
+    organizationId: string,
+    page: number,
+    count: number
+  ) => Promise<GroupMembersipListData>;
+  acceptGroup: (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => Promise<void>;
+  rejectGroup: (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => Promise<void>;
+  leaveGroup: (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => Promise<void>;
   createTask: (
+    token: string,
     organizationId: string,
     taskId: string,
     name: string,
     description: string,
+    rewards: { [email: string] : number },
     deadline: Date
   ) => Promise<void>;
   getTask: (organizationId: string, taskId: string) => Promise<TaskData>;
@@ -126,7 +150,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     count: number
   ) => {
     const response = await api.get(
-      `/users/me/organization/${organizationId}/task?page=${page}&count=${count}`,
+      `/users/me/organization/${organizationId}/tasks?page=${page}&count=${count}`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -137,7 +161,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     return {
       currentPage: response.data.currentPage,
       maxPage: response.data.max_page,
-      elements: response.data.tasks.filter((task: any) => {
+      elements: response.data.tasks.map((task: any) => {
         let status = "Awaiting";
         if (task.is_approved_completed) {
           status = "Approved";
@@ -220,6 +244,37 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
+  const getOrganizationTasks = async (
+    organizationId: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/organization/${organizationId}/tasks?page=${page}&count=${count}`
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.tasks.map((task: any) => {
+        let status = "Awaiting";
+        if (task.is_approved_completed) {
+          status = "Approved";
+        } else if (task.is_rejected_completed || task.is_rejected_start) {
+          status = "Rejected";
+        } else if (task.is_approved_start) {
+          status = "Progress";
+        }
+
+        return {
+          ...task,
+          deadline: new Date(task.deadline),
+          status: status,
+        };
+      }),
+    };
+  };
+
   const getUserOrganizations = async (
     token: string,
     page: number,
@@ -237,7 +292,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     return {
       currentPage: response.data.currentPage,
       maxPage: response.data.max_page,
-      elements: response.data.organizations.filter((organization: any) => {
+      elements: response.data.organizations.map((organization: any) => {
         return {
           ...organization,
           creationDate: new Date(organization.creation_date),
@@ -269,55 +324,144 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const createGroup = async (
+    token: string,
     organizationId: string,
     identifier: string,
     name: string,
-    area: string,
-    leaderReward: string,
     members: string[]
   ) => {
-    await api.post(`/organization/${organizationId}/group/create`, {
-      identifier: identifier,
-      name: name,
-      area: area,
-      leader_reward: leaderReward,
-      members: members,
-    });
+    await api.post(
+      `/organization/${organizationId}/group/create`,
+      {
+        identifier: identifier,
+        name: name,
+        members: members,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
 
-  const acceptGroup = async (organizationId: string, groupId: string) => {
-    await api.post(`/organization/${organizationId}/group/${groupId}/accept`);
+  const getUserGroups = async (
+    token: string,
+    organizationId: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/users/me/organization/${organizationId}/groups?page=${page}&count=${count}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.groups.map((group: any) => {
+        let status = "Invite";
+        if (group.leader) {
+          status = "Leader";
+        } else if (group.accepted) {
+          status = "Member";
+        } else if (group.rejected) {
+          status = "Rejected";
+        }
+
+        return {
+          ...group,
+          status: status,
+          date: new Date(group.invite_date),
+        };
+      }),
+    };
+  };
+
+  const acceptGroup = async (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/group/${groupId}/accept`,
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
 
-  const rejectGroup = async (organizationId: string, groupId: string) => {
-    await api.post(`/organization/${organizationId}/group/${groupId}/reject`);
+  const rejectGroup = async (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/group/${groupId}/reject`,
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
 
-  const leaveGroup = async (organizationId: string, groupId: string) => {
-    await api.post(`/organization/${organizationId}/group/${groupId}/leave`);
+  const leaveGroup = async (
+    token: string,
+    organizationId: string,
+    groupId: string
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/group/${groupId}/leave`,
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
 
   const createTask = async (
+    token: string,
     organizationId: string,
     taskId: string,
     name: string,
     description: string,
+    rewards: { [email: string] : number },
     deadline: Date
   ) => {
-    await api.post(`/organization/${organizationId}/group/task/create`, {
-      identifier: taskId,
-      name: name,
-      description: description,
-      deadline: deadline.toISOString(),
-    });
+    await api.post(
+      `/organization/${organizationId}/group/task/create`,
+      {
+        identifier: taskId,
+        name: name,
+        description: description,
+        rewards: rewards,
+        deadline: deadline.toISOString(),
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
 
     return;
   };
@@ -429,9 +573,11 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         signUp,
         createOrganization,
         getOrganization,
+        getOrganizationTasks,
         getUserOrganizations,
         joinOrganization,
         createGroup,
+        getUserGroups,
         acceptGroup,
         rejectGroup,
         leaveGroup,

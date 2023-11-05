@@ -28,6 +28,7 @@ import { UserProvider } from "./contexts/UserProvider";
 import "react-toastify/dist/ReactToastify.css";
 import CreateTaskPage from "./pages/CreateTaskPage";
 import OrganizationJoin from "./pages/OrganizationJoin";
+import GroupCreatePage from "./pages/GroupCreatePage";
 
 const RedirectToTasks = () => {
   const { organization } = useParams<{ organization: string }>();
@@ -62,7 +63,7 @@ const CreateTaskRedirect = () => {
 
   return (
     <OrganizationPage currentSelection="tasks">
-      <CreateTaskPage organization={organization} />
+      <CreateTaskPage organizationId={organization} />
     </OrganizationPage>
   );
 };
@@ -76,18 +77,17 @@ const TasksRedirect = () => {
 
   return (
     <OrganizationPage currentSelection="tasks">
-      <TasksPage organization={organization} />
+      <TasksPage organizationId={organization} />
     </OrganizationPage>
   );
 };
 
 type ProfileRedirectParams = {
   organization: string;
-  username: string;
 };
 
 const ProfileRedirect = () => {
-  const { organization, username } = useParams<ProfileRedirectParams>();
+  const { organization } = useParams<ProfileRedirectParams>();
 
   // Replace console.error with react toastify
 
@@ -97,15 +97,29 @@ const ProfileRedirect = () => {
     return <Navigate to="/" replace />;
   }
 
-  if (!username) {
-    console.error("Username not defined in Profile page");
+  return (
+    <OrganizationPage currentSelection="profile">
+      <ProfilePage organization={organization} />
+    </OrganizationPage>
+  );
+};
 
-    return <Navigate to={`/organization/${organization}`} replace />;
+type GroupCreateParams = {
+  organizationId: string;
+};
+
+const GroupCreateRedirect = () => {
+  const { organizationId } = useParams<GroupCreateParams>();
+
+  if (!organizationId) {
+    console.error("Organization not defined in create group page");
+
+    return <Navigate to="/" replace />;
   }
 
   return (
     <OrganizationPage currentSelection="profile">
-      <ProfilePage organization={organization} username={username} />
+      <GroupCreatePage organizationId={organizationId} />
     </OrganizationPage>
   );
 };
@@ -211,10 +225,19 @@ function App() {
               />
 
               <Route
-                path="/organization/:organization/users/:username"
+                path="/organization/:organization/profile"
                 element={
                   <ProtectedRoute>
                     <ProfileRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/group/create"
+                element={
+                  <ProtectedRoute>
+                    <GroupCreateRedirect />
                   </ProtectedRoute>
                 }
               />

@@ -103,6 +103,7 @@ const CreateOrganizationForm = () => {
             <input
               className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
               placeholder="awesome_project_2023"
+              pattern="^[a-zA-Z0-9_-]{1,50}$"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
             />

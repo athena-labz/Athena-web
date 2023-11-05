@@ -16,6 +16,17 @@ type OrganizationData = {
   creationDate: Date;
 };
 
+type GroupMembersipStatus = "Leader" | "Invite" | "Member" | "Rejected";
+
+type GroupMembersipData = {
+  status: GroupMembersipStatus;
+  group: {
+    identifier: string;
+    name: string;
+  };
+  date: Date
+}
+
 type TaskStatus = "Awaiting" | "Progress" | "Approved" | "Rejected";
 
 type TaskData = {
@@ -49,6 +60,7 @@ type ListResponse<T> = {
 type NFTListData = ListResponse<NFTData>;
 type TaskListData = ListResponse<TaskData>;
 type OrganizationListData = ListResponse<OrganizationData>;
+type GroupMembersipListData = ListResponse<GroupMembersipData>;
 type UserListData = ListResponse<UserOrganizationData>;
 
 type StudentReward = {

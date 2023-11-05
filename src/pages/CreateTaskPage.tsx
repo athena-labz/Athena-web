@@ -6,6 +6,16 @@ import { LoadingIcon } from "../components/LoadingIcon";
 import { useBackEnd } from "../contexts/BackEndProvider";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserProvider";
+import { toast } from "react-toastify";
+
+import { v4 as uuidv4 } from "uuid";
+
+const addDays = (date: Date, days: number) => {
+  var result = date;
+  result.setDate(result.getDate() + days);
+
+  return result;
+};
 
 const addDaysToCurrentDate = (daysToAdd: number): string => {
   const currentDate = new Date();
@@ -19,7 +29,7 @@ const addDaysToCurrentDate = (daysToAdd: number): string => {
 };
 
 type CreateTaskPageProps = {
-  organization: string;
+  organizationId: string;
 };
 
 // Name
@@ -27,9 +37,12 @@ type CreateTaskPageProps = {
 // Date of completion
 // Rewards for everyone
 
-const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
+const CreateTaskPage = ({ organizationId }: CreateTaskPageProps) => {
   const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
+  const [description1, setDescription1] = useState<string>("");
+  const [description2, setDescription2] = useState<string>("");
+  const [description3, setDescription3] = useState<string>("");
+  const [description4, setDescription4] = useState<string>("");
   const [daysToCompletion, setDaysToCompletion] = useState<number>(30);
   const [expectedDeadline, setExpectedDeadline] = useState<string>("");
 
@@ -83,18 +96,37 @@ const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
 
   const submitTask = async () => {
     if (user === null) {
-      return Promise.reject("User not signed in");
+      toast.error("User tried to create task while signed out");
+      return;
     }
 
-    // backEnd.createTask(
-    //   user,
-    //   "signature",
-    //   name,
-    //   description,
-    //   daysToCompletion,
-    //   userRewards,
-    //   studentsRewards
-    // );
+    let rewards: { [email: string]: number } = {};
+
+    rewards[user.email] = userRewards;
+    for (let i = 0; i < studentsRewards.length; i++) {
+      rewards[studentsRewards[i].email] = studentsRewards[i].rewards;
+    }
+
+    try {
+      await backEnd.createTask(
+        user.token,
+        organizationId,
+        uuidv4(),
+        name,
+        [description1, description2, description3, description4].join("\n"),
+        rewards,
+        addDays(new Date(), daysToCompletion)
+      );
+
+      navigate(`/organization/${organizationId}/tasks`);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to create task");
+      }
+    }
   };
 
   return (
@@ -103,6 +135,14 @@ const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
         <h1 className="text-4xl text-slate-600 font-semibold">Create Task</h1>
       </div>
       <div className="text-lg md:text-xl font-semibold w-full flex flex-col gap-8 bg-white rounded-lg p-8">
+        <div className="flex gap-2 w-full">
+          <span className="text-slate-400">
+            The following description fields will serve for a multi-disciplinary
+            knowledge-base assessment. Please remember that project assessment
+            relies largely on your skills in unicity and specificity design.
+          </span>
+        </div>
+
         <div className="flex flex-col gap-2 w-full">
           <span>
             Write a name which summarises what you are proposing to do.
@@ -116,15 +156,52 @@ const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
         </div>
 
         <div className="flex flex-col gap-2 w-full">
+          <span>Describe briefily what your task is about.</span>
+          <textarea
+            className="w-full h-40 p-4 bg-opposite-paleborder-400 border-2 text-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={description1}
+            onChange={(e) => setDescription1(e.target.value)}
+            placeholder=""
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 w-full">
           <span>
-            Describe in more detail what you will do and specify the
-            deliverables.
+            In relation to your proposal which strategies allow a team-work
+            development ?
           </span>
           <textarea
             className="w-full h-40 p-4 bg-opposite-paleborder-400 border-2 text-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={"I will do..."}
+            value={description2}
+            onChange={(e) => setDescription2(e.target.value)}
+            placeholder=""
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 w-full">
+          <span>
+            Please highlight one or more creative features of your project.
+            (Please remember that creativity can occur at every execution phase
+            of the project)
+          </span>
+          <textarea
+            className="w-full h-40 p-4 bg-opposite-paleborder-400 border-2 text-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={description3}
+            onChange={(e) => setDescription3(e.target.value)}
+            placeholder=""
+          />
+        </div>
+
+        <div className="flex flex-col gap-2 w-full">
+          <span>
+            Describe the project fundamental phases which lead ideas into
+            actions.
+          </span>
+          <textarea
+            className="w-full h-40 p-4 bg-opposite-paleborder-400 border-2 text-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={description4}
+            onChange={(e) => setDescription4(e.target.value)}
+            placeholder=""
           />
         </div>
 
@@ -207,16 +284,13 @@ const CreateTaskPage = ({ organization }: CreateTaskPageProps) => {
 
         <div className="w-full flex justify-end gap-4">
           <div
-            onClick={() => navigate(`/organization/${organization}/tasks`)}
+            onClick={() => navigate(`/organization/${organizationId}/tasks`)}
             className="p-4 px-8 mb-4 hover:cursor-pointer flex flex-row gap-2 items-center border-dark-blue border-2 rounded-lg"
           >
             <span className="text-dark-blue text-2xl font-bold">Back</span>
           </div>
           <div
-            onClick={() => {
-              submitTask();
-              navigate(`/organization/${organization}/tasks`)
-            }}
+            onClick={submitTask}
             className="p-4 px-8 mb-4 hover:cursor-pointer flex flex-row gap-2 items-center bg-dark-blue rounded-lg"
           >
             <span className="text-white text-2xl font-bold">Create task</span>

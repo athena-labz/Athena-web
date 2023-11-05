@@ -58,8 +58,6 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
   const { organization } = useParams<Params>();
   const navigate = useNavigate();
 
-  const username = "aliceIsSmart";
-
   const toggleSidebar = () => {
     setShowSidebar(!showSidebar);
   };
@@ -111,7 +109,7 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
               iconName="person"
               selected={currentSelection === "profile"}
               onSelect={() =>
-                navigate(`/organization/${organization}/users/${username}`)
+                navigate(`/organization/${organization}/profile`)
               }
             />
 
@@ -120,7 +118,7 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
                 onClick={() => navigate("/")}
                 className="p-4 mb-4 hover:cursor-pointer flex flex-row gap-2 items-center bg-dark-blue rounded-lg"
               >
-                <img className="h-8" src="/assets/logout.svg" />
+                <img className="h-8" src="/assets/logout_white.svg" />
                 <span className="text-white text-lg font-bold">
                   Back to home
                 </span>

@@ -21,7 +21,7 @@ const OrganizationPage = ({
 }: OrganizationPageProps) => {
   return (
     <div className="bg-slate-100 h-screen w-full">
-      <Header border />
+      <Header border background />
       <div className="mt-20">
         <Sidebar currentSelection={currentSelection} />
 
