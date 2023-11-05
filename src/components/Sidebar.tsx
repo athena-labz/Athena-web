@@ -50,9 +50,10 @@ type Params = {
 
 type SidebarProps = {
   currentSelection: CurrentSideBarSelection;
+  organizationName: string;
 };
 
-const Sidebar = ({ currentSelection }: SidebarProps) => {
+const Sidebar = ({ currentSelection, organizationName }: SidebarProps) => {
   const [showSidebar, setShowSidebar] = useState(true);
 
   const { organizationId } = useParams<Params>();
@@ -84,7 +85,7 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
           <ul className="flex flex-col p-4">
             <div className="flex p-2 mb-4">
               <span className="text-2xl text-dark-blue font-extrabold">
-                Basketball team organization
+                {organizationName}
               </span>
             </div>
 

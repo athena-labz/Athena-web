@@ -50,7 +50,7 @@ const SpecificTaskRedirect = () => {
   }
 
   return (
-    <OrganizationPage currentSelection="tasks">
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <SpecificTaskPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
@@ -64,7 +64,7 @@ const CreateTaskRedirect = () => {
   if (!organizationId) return <NotFoundPage />;
 
   return (
-    <OrganizationPage currentSelection="tasks">
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <CreateTaskPage organizationId={organizationId} />
     </OrganizationPage>
   );
@@ -78,7 +78,7 @@ const TasksRedirect = () => {
   if (!organizationId) return <NotFoundPage />;
 
   return (
-    <OrganizationPage currentSelection="tasks">
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <TasksPage organizationId={organizationId} />
     </OrganizationPage>
   );
@@ -93,7 +93,7 @@ const TaskSubmitRedirect = () => {
   if (!taskId) return <NotFoundPage />;
 
   return (
-    <OrganizationPage currentSelection="tasks">
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <SubmitWorkPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
@@ -108,7 +108,7 @@ const ReviewRedirect = () => {
   if (!taskId) return <NotFoundPage />;
 
   return (
-    <OrganizationPage currentSelection="tasks">
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <ReviewWorkPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
@@ -130,7 +130,10 @@ const ProfileRedirect = () => {
   }
 
   return (
-    <OrganizationPage currentSelection="profile">
+    <OrganizationPage
+      organizationId={organizationId}
+      currentSelection="profile"
+    >
       <ProfilePage organization={organizationId} />
     </OrganizationPage>
   );
@@ -150,7 +153,10 @@ const GroupCreateRedirect = () => {
   }
 
   return (
-    <OrganizationPage currentSelection="profile">
+    <OrganizationPage
+      organizationId={organizationId}
+      currentSelection="profile"
+    >
       <GroupCreatePage organizationId={organizationId} />
     </OrganizationPage>
   );
@@ -166,11 +172,11 @@ const UsersRedirect = () => {
   if (!organizationId) {
     console.error("Organization not defined in create group page");
 
-    return <NotFoundPage />
+    return <NotFoundPage />;
   }
 
   return (
-    <OrganizationPage currentSelection="users">
+    <OrganizationPage organizationId={organizationId} currentSelection="users">
       <UsersPage organizationId={organizationId} />
     </OrganizationPage>
   );
