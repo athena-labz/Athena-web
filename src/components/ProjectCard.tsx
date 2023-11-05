@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { taskStatusDisplay } from "../utils/taskHelpers";
+import { useEffect } from "react";
 
 type Params = {
-  organization: string;
+  organizationId: string;
 };
 
 type ProjectCardProps = {
@@ -10,7 +11,7 @@ type ProjectCardProps = {
   name: string;
   description: string;
   status: TaskStatus;
-  date: string;
+  date: Date;
 };
 
 export const ProjectCard = ({
@@ -21,12 +22,12 @@ export const ProjectCard = ({
   date,
 }: ProjectCardProps) => {
   const navigate = useNavigate();
-  const { organization } = useParams<Params>();
+  const { organizationId } = useParams<Params>();
 
   return (
     <div
       onClick={() =>
-        navigate(`/organization/${organization}/tasks/${projectId}`)
+        navigate(`/organization/${organizationId}/tasks/${projectId}`)
       }
       className="flex flex-col text-slate-600 gap-2 w-72 p-8 bg-white rounded-lg hover:cursor-pointer"
     >
@@ -35,7 +36,7 @@ export const ProjectCard = ({
       <hr className="mt-2" />
       <div className="flex flex-row text-sm text-slate-400 justify-between items-center">
         <span>{taskStatusDisplay(status)}</span>
-        <span>{date}</span>
+        <span>{date.toLocaleDateString()}</span>
       </div>
     </div>
   );

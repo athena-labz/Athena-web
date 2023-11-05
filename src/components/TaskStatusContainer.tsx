@@ -18,43 +18,64 @@ const ButtonContainer = ({ children, onClick }: ButtonContainerProps) => (
   </div>
 );
 
+const findTaskStatus = (
+  isStarted: boolean,
+  isRejected: boolean,
+  isCompleted: boolean
+) => {
+  if (isRejected) {
+    return "Rejected";
+  } else if (isCompleted) {
+    return "Completed";
+  } else if (isStarted) {
+    return "In progress";
+  } else {
+    return "Awaiting approval";
+  }
+};
+
 type TaskStatusContainerProps = {
-  submissionHistory: SubmissionEventData[];
-  taskStatus: TaskStatus;
-  userRole: "Admin" | "AssignedUser" | "NormalUser";
+  actionHistory: TaskActionData[];
+  isStarted: boolean;
+  isRejected: boolean;
+  isCompleted: boolean;
+  isUserAssigned: boolean;
+  isUserTeacher: boolean;
 };
 
 export const TaskStatusContainer = ({
-  submissionHistory,
-  taskStatus,
-  userRole,
+  actionHistory,
+  isStarted,
+  isRejected,
+  isCompleted,
+  isUserAssigned,
+  isUserTeacher,
 }: TaskStatusContainerProps) => {
-  const SubmissionHistory = () => (
+  const ActionHistory = () => (
     <div className="flex flex-col gap-4">
       <span className="text-2xl text-slate-600 font-semibold">
-        Submission history
+        Action history
       </span>
       <div className="flex flex-col gap-2 h-32 overflow-y-scroll">
-        {submissionHistory.map(({ title, content, type, date }) => (
-          <div
-            className={`flex flex-row justify-between items-center rounded-lg p-2 border-2 ${
-              type === "submission"
-                ? "border-main-blue"
-                : type === "rejection"
-                ? "border-rose-500"
-                : type === "approval"
-                ? "border-emerald-500"
-                : "border-slate-200"
-            } border-slate-200`}
-          >
-            <div className="flex items-center text-slate-500 text-sm">
-              <span className="w-32 truncate">{title}</span>
+        {actionHistory.length === 0 && <span>No actions yet</span>}
+
+        {actionHistory.map(
+          ({ name, description, isSubmission, isReview, date }) => (
+            <div
+              className={`flex flex-row justify-between items-center rounded-lg p-2 border-2 ${
+                isSubmission ? "border-main-blue" : "border-yellow-500"
+              } border-slate-200`}
+            >
+              <div className="flex items-center text-slate-500 text-sm">
+                <span className="w-32 truncate">{name}</span>
+                <span className="text-justify line-clamp-3">{description}</span>
+              </div>
+              <div className="flex items-center text-slate-500 text-sm">
+                <span>{date.toISOString()}</span>
+              </div>
             </div>
-            <div className="flex items-center text-slate-500 text-sm">
-              <span>{date}</span>
-            </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
     </div>
   );
@@ -63,25 +84,23 @@ export const TaskStatusContainer = ({
     <div className="flex flex-col gap-4 w-full bg-white rounded-lg p-8">
       <div className="flex flex-row w-full justify-center">
         <span className="text-base text-slate-500">
-          {taskStatusDisplay(taskStatus)}
+          {findTaskStatus(isStarted, isRejected, isCompleted)}
         </span>
       </div>
 
       <hr />
 
-      {["Progress", "Approved", "Rejected"].includes(taskStatus) && (
-        <SubmissionHistory />
-      )}
+      <ActionHistory />
 
-      {taskStatus === "Progress" && userRole === "AssignedUser" && (
+      {isStarted && !isRejected && !isCompleted && isUserAssigned && (
         <div className="mt-2">
           <ButtonContainer onClick={() => {}}>
-            Mark as completed
+            Submit work for review
           </ButtonContainer>
         </div>
       )}
 
-      {taskStatus === "Progress" && userRole === "Admin" && (
+      {isStarted && !isRejected && !isCompleted && isUserTeacher && (
         <div className="mt-2">
           <ButtonContainer onClick={() => {}}>Review work</ButtonContainer>
         </div>

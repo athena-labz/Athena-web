@@ -45,7 +45,7 @@ const SidebarSelectionContainer = ({
 };
 
 type Params = {
-  organization: string;
+  organizationId: string;
 };
 
 type SidebarProps = {
@@ -55,7 +55,7 @@ type SidebarProps = {
 const Sidebar = ({ currentSelection }: SidebarProps) => {
   const [showSidebar, setShowSidebar] = useState(true);
 
-  const { organization } = useParams<Params>();
+  const { organizationId } = useParams<Params>();
   const navigate = useNavigate();
 
   const toggleSidebar = () => {
@@ -94,14 +94,14 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
               title="Tasks"
               iconName="task"
               selected={currentSelection === "tasks"}
-              onSelect={() => navigate(`/organization/${organization}/tasks`)}
+              onSelect={() => navigate(`/organization/${organizationId}/tasks`)}
             />
 
             <SidebarSelectionContainer
               title="Users"
               iconName="group"
               selected={currentSelection === "users"}
-              onSelect={() => navigate(`/organization/${organization}/users`)}
+              onSelect={() => navigate(`/organization/${organizationId}/users`)}
             />
 
             <SidebarSelectionContainer
@@ -109,7 +109,7 @@ const Sidebar = ({ currentSelection }: SidebarProps) => {
               iconName="person"
               selected={currentSelection === "profile"}
               onSelect={() =>
-                navigate(`/organization/${organization}/profile`)
+                navigate(`/organization/${organizationId}/profile`)
               }
             />
 

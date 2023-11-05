@@ -6,34 +6,17 @@ import { TaskStatusContainer } from "../components/TaskStatusContainer";
 
 import { taskContentSample } from "../assets/samples";
 import { useBackEnd } from "../contexts/BackEndProvider";
-
-type TaskContent = {
-  name: string;
-  taskStatus: TaskStatus;
-  description: string;
-  date: string;
-  submissionHistory: SubmissionEventData[];
-  userAssigned?: {
-    username: string;
-    email: string;
-  };
-};
+import { toast } from "react-toastify";
+import { useUser } from "../contexts/UserProvider";
 
 type TaskContentProps = {
   name: string;
   description: string;
-  date: string;
-  userAssigned?: {
-    username: string;
-    email: string;
-  };
+  date: Date;
+  users: string[]; // email of the group participants
 };
 
-const TaskContent = ({
-  name,
-  description,
-  date,
-}: TaskContentProps) => (
+const TaskContent = ({ name, description, date }: TaskContentProps) => (
   <div className="flex h-full items-start col-span-2">
     <div className="flex flex-col w-full gap-4 bg-white rounded-lg p-8">
       <h1 className="text-3xl text-slate-600 font-semibold">{name}</h1>
@@ -43,7 +26,7 @@ const TaskContent = ({
       <hr />
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
-          <span>{date}</span>
+          <span>{date.toLocaleDateString()}</span>
         </div>
       </div>
     </div>
@@ -55,26 +38,77 @@ type SpecificTaskPageProps = {
   taskId: string;
 };
 
-const SpecificTaskPage = ({ organizationId, taskId }: SpecificTaskPageProps) => {
+const SpecificTaskPage = ({
+  organizationId,
+  taskId,
+}: SpecificTaskPageProps) => {
   const [taskData, setTaskData] = useState<TaskData | null>(null);
-  const [submissionHistory, setSubmissionHistory] = useState<
-    SubmissionEventData[] | null
-  >(null);
+  const [taskMembers, setTaskMembers] = useState<ExternalUserData[] | null>(
+    null
+  );
+  const [taskActions, setTaskActions] = useState<TaskActionData[] | null>(null);
+  const [isUserAssigned, setIsUserAssigned] = useState(false);
 
+  const { user } = useUser()!;
   const backEnd = useBackEnd()!;
+
+  useEffect(() => {
+    if (user === null || taskMembers === null) {
+      return;
+    }
+
+    if (taskMembers.map(({ email }) => email).includes(user.email)) {
+      setIsUserAssigned(true);
+    } else {
+      setIsUserAssigned(false);
+    }
+  }, [taskMembers]);
 
   useEffect(() => {
     loadTaskInformation();
   }, []);
 
   const loadTaskInformation = async () => {
-    backEnd.getTask(organizationId, taskId).then((taskData) => {
-      setTaskData(taskData);
-    });
+    try {
+      const task = await backEnd.getTask(organizationId, taskId);
+      setTaskData(task);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get task");
+      }
+    }
 
-    // backEnd.getTaskSubmissionHistory(taskId).then((submissionHistory) => {
-    //   setSubmissionHistory(submissionHistory);
-    // });
+    try {
+      const actions = await backEnd.getTaskActions(
+        organizationId,
+        taskId,
+        1,
+        20
+      );
+      setTaskActions(actions.elements);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get task actions");
+      }
+    }
+
+    try {
+      const members = await backEnd.getTaskMembers(organizationId, taskId);
+      setTaskMembers(members);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get task members");
+      }
+    }
   };
 
   return (
@@ -85,19 +119,23 @@ const SpecificTaskPage = ({ organizationId, taskId }: SpecificTaskPageProps) => 
         </div>
       )}
 
-      {taskData && submissionHistory && (
+      {taskData && taskActions && taskMembers && user && (
         <div className="flex flex-wrap md:grid md:grid-cols-3 gap-4">
           <TaskContent
             name={taskData.name}
             description={taskData.description}
             date={taskData.date}
+            users={[]}
           />
 
           <div className="flex h-full items-start">
             <TaskStatusContainer
-              taskStatus={taskData.status}
-              userRole="AssignedUser"
-              submissionHistory={submissionHistory}
+              actionHistory={taskActions}
+              isStarted={taskData.status !== "Awaiting"}
+              isRejected={taskData.status === "Rejected"}
+              isCompleted={taskData.status === "Approved"}
+              isUserAssigned={isUserAssigned}
+              isUserTeacher={user.userType === "teacher"}
             />
           </div>
         </div>

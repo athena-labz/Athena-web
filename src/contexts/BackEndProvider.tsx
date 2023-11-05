@@ -93,10 +93,20 @@ export type BackEndContext = {
     taskId: string,
     name: string,
     description: string,
-    rewards: { [email: string] : number },
+    rewards: { [email: string]: number },
     deadline: Date
   ) => Promise<void>;
   getTask: (organizationId: string, taskId: string) => Promise<TaskData>;
+  getTaskMembers: (
+    organizationId: string,
+    taskId: string
+  ) => Promise<ExternalUserData[]>;
+  getTaskActions: (
+    organizationId: string,
+    taskId: string,
+    page: number,
+    count: number
+  ) => Promise<TaskActionListData>;
   approveStartTask: (organizationId: string, taskId: string) => Promise<void>;
   rejectStartTask: (organizationId: string, taskId: string) => Promise<void>;
   submitTask: (
@@ -174,6 +184,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         return {
           ...task,
           deadline: new Date(task.deadline),
+          date: new Date(task.creation_date),
           status: status,
         };
       }),
@@ -269,6 +280,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         return {
           ...task,
           deadline: new Date(task.deadline),
+          date: new Date(task.creation_date),
           status: status,
         };
       }),
@@ -444,7 +456,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     taskId: string,
     name: string,
     description: string,
-    rewards: { [email: string] : number },
+    rewards: { [email: string]: number },
     deadline: Date
   ) => {
     await api.post(
@@ -486,7 +498,44 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     return {
       ...response.data,
       deadline: new Date(response.data.deadline),
+      date: new Date(response.data.creation_date),
       status: status,
+    };
+  };
+
+  const getTaskMembers = async (organizationId: string, taskId: string) => {
+    const response = await api.get(
+      `/organization/${organizationId}/task/${taskId}/members`
+    );
+
+    return response.data.map((user: any) => ({
+      userType: user.type,
+      email: user.email,
+      stakeAddress: user.stake_address,
+    }));
+  };
+
+  const getTaskActions = async (
+    organizationId: string,
+    taskId: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/organization/${organizationId}/task/${taskId}/actions?page=${page}&count=${count}`
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.actions.map((action: any) => {
+        return {
+          ...action,
+          isSubmission: action.is_submission,
+          isReview: action.is_review,
+          date: new Date(action.action_date),
+        };
+      }),
     };
   };
 
@@ -583,6 +632,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         leaveGroup,
         createTask,
         getTask,
+        getTaskMembers,
+        getTaskActions,
         approveStartTask,
         rejectStartTask,
         submitTask,

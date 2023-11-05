@@ -1,5 +1,11 @@
 // globals.d.ts
 
+type ExternalUserData = {
+  userType: "student" | "teacher" | "organizer";
+  email: string;
+  stakeAddress: string;
+};
+
 type UserData = {
   userType: "student" | "teacher" | "organizer";
   email: string;
@@ -35,20 +41,21 @@ type TaskData = {
   description: string;
   deadline: Date;
   status: TaskStatus;
-  date: string;
+  date: Date;
 };
+
+type TaskActionData = {
+  name: string;
+  description: string;
+  isSubmission: boolean;
+  isReview: boolean;
+  date: Date;
+}
 
 type NFTData = {
   nftId: string;
   name: string;
   image: string;
-};
-
-type SubmissionEventData = {
-  title: string;
-  type: "submission" | "approval" | "rejection" | "revision";
-  content: string;
-  date: string;
 };
 
 type ListResponse<T> = {
@@ -59,9 +66,12 @@ type ListResponse<T> = {
 
 type NFTListData = ListResponse<NFTData>;
 type TaskListData = ListResponse<TaskData>;
+type TaskActionListData = ListResponse<TaskActionData>;
+
 type OrganizationListData = ListResponse<OrganizationData>;
 type GroupMembersipListData = ListResponse<GroupMembersipData>;
 type UserListData = ListResponse<UserOrganizationData>;
+
 
 type StudentReward = {
   email: string;

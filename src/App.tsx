@@ -31,9 +31,9 @@ import OrganizationJoin from "./pages/OrganizationJoin";
 import GroupCreatePage from "./pages/GroupCreatePage";
 
 const RedirectToTasks = () => {
-  const { organization } = useParams<{ organization: string }>();
+  const { organizationId } = useParams<{ organizationId: string }>();
 
-  return <Navigate to={`/organization/${organization}/tasks`} replace />;
+  return <Navigate to={`/organization/${organizationId}/tasks`} replace />;
 };
 
 type SpecificTaskRedirectParams = { organizationId: string; taskId: string };
@@ -54,44 +54,44 @@ const SpecificTaskRedirect = () => {
   );
 };
 
-type CreateTaskRedirectParams = { organization: string };
+type CreateTaskRedirectParams = { organizationId: string };
 
 const CreateTaskRedirect = () => {
-  const { organization } = useParams<CreateTaskRedirectParams>();
+  const { organizationId } = useParams<CreateTaskRedirectParams>();
 
-  if (!organization) return <NotFoundPage />;
+  if (!organizationId) return <NotFoundPage />;
 
   return (
     <OrganizationPage currentSelection="tasks">
-      <CreateTaskPage organizationId={organization} />
+      <CreateTaskPage organizationId={organizationId} />
     </OrganizationPage>
   );
 };
 
-type TasksRedirectParams = { organization: string };
+type TasksRedirectParams = { organizationId: string };
 
 const TasksRedirect = () => {
-  const { organization } = useParams<TasksRedirectParams>();
+  const { organizationId } = useParams<TasksRedirectParams>();
 
-  if (!organization) return <NotFoundPage />;
+  if (!organizationId) return <NotFoundPage />;
 
   return (
     <OrganizationPage currentSelection="tasks">
-      <TasksPage organizationId={organization} />
+      <TasksPage organizationId={organizationId} />
     </OrganizationPage>
   );
 };
 
 type ProfileRedirectParams = {
-  organization: string;
+  organizationId: string;
 };
 
 const ProfileRedirect = () => {
-  const { organization } = useParams<ProfileRedirectParams>();
+  const { organizationId } = useParams<ProfileRedirectParams>();
 
   // Replace console.error with react toastify
 
-  if (!organization) {
+  if (!organizationId) {
     console.error("Username not defined in Profile page");
 
     return <Navigate to="/" replace />;
@@ -99,7 +99,7 @@ const ProfileRedirect = () => {
 
   return (
     <OrganizationPage currentSelection="profile">
-      <ProfilePage organization={organization} />
+      <ProfilePage organization={organizationId} />
     </OrganizationPage>
   );
 };
@@ -176,7 +176,7 @@ function App() {
 
             <>
               <Route
-                path="/organization/:organization"
+                path="/organization/:organizationId"
                 element={
                   <ProtectedRoute>
                     <RedirectToTasks />
@@ -185,7 +185,7 @@ function App() {
               />
 
               <Route
-                path="/organization/:organization/tasks"
+                path="/organization/:organizationId/tasks"
                 element={
                   <ProtectedRoute>
                     <TasksRedirect />
@@ -194,7 +194,7 @@ function App() {
               />
 
               <Route
-                path="/organization/:organization/tasks/create"
+                path="/organization/:organizationId/tasks/create"
                 element={
                   <ProtectedRoute>
                     <CreateTaskRedirect />
@@ -214,7 +214,7 @@ function App() {
 
             <>
               <Route
-                path="/organization/:organization/users"
+                path="/organization/:organizationId/users"
                 element={
                   <ProtectedRoute>
                     <OrganizationPage currentSelection="users">
@@ -225,7 +225,7 @@ function App() {
               />
 
               <Route
-                path="/organization/:organization/profile"
+                path="/organization/:organizationId/profile"
                 element={
                   <ProtectedRoute>
                     <ProfileRedirect />

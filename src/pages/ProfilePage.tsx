@@ -240,8 +240,22 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
 
     setUserTasks(null);
 
-    const assignedTasks = await getUserTasks(user.token, organization, page, 3);
-    setUserTasks(assignedTasks);
+    try {
+      const assignedTasks = await getUserTasks(
+        user.token,
+        organization,
+        page,
+        3
+      );
+      setUserTasks(assignedTasks);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get assigned taskss");
+      }
+    }
   };
 
   const updateUserGroups = async (page: number) => {
@@ -252,8 +266,17 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
 
     setUserGroups(null);
 
-    const groups = await getUserGroups(user.token, organization, page, 3);
-    setUserGroups(groups);
+    try {
+      const groups = await getUserGroups(user.token, organization, page, 3);
+      setUserGroups(groups);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get user groups");
+      }
+    }
   };
 
   return (
