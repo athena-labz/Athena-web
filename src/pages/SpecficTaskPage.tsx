@@ -130,6 +130,8 @@ const SpecificTaskPage = ({
 
           <div className="flex h-full items-start">
             <TaskStatusContainer
+              organizationId={organizationId}
+              taskId={taskId}
               actionHistory={taskActions}
               isStarted={taskData.status !== "Awaiting"}
               isRejected={taskData.status === "Rejected"}

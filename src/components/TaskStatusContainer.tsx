@@ -1,6 +1,10 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import { taskStatusDisplay } from "../utils/taskHelpers";
+import { useBackEnd } from "../contexts/BackEndProvider";
+import { useUser } from "../contexts/UserProvider";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 type ButtonContainerProps = {
   children: ReactNode;
@@ -35,6 +39,8 @@ const findTaskStatus = (
 };
 
 type TaskStatusContainerProps = {
+  organizationId: string;
+  taskId: string;
   actionHistory: TaskActionData[];
   isStarted: boolean;
   isRejected: boolean;
@@ -44,6 +50,8 @@ type TaskStatusContainerProps = {
 };
 
 export const TaskStatusContainer = ({
+  organizationId,
+  taskId,
   actionHistory,
   isStarted,
   isRejected,
@@ -51,28 +59,85 @@ export const TaskStatusContainer = ({
   isUserAssigned,
   isUserTeacher,
 }: TaskStatusContainerProps) => {
+  const navigate = useNavigate();
+
+  const backEnd = useBackEnd()!;
+  const { user } = useUser()!;
+
+  const [disableButtons, setDisableButtons] = useState(false);
+
+  const approveStart = async () => {
+    if (user === null) {
+      toast.error("Tried to approve start of task while signed out");
+      return;
+    }
+
+    setDisableButtons(true);
+
+    try {
+      await backEnd.approveStartTask(user.token, organizationId, taskId);
+      toast.success("Successfully approved task!");
+      navigate(`/organization/${organizationId}/tasks/${taskId}`);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to approve task");
+      }
+    }
+
+    setDisableButtons(false);
+  };
+
+  const rejectStart = async () => {
+    if (user === null) {
+      toast.error("Tried to reject start of task while signed out");
+      return;
+    }
+
+    setDisableButtons(true);
+
+    try {
+      await backEnd.rejectStartTask(user.token, organizationId, taskId);
+      toast.success("Successfully rejected task!");
+      navigate(`/organization/${organizationId}/tasks/${taskId}`);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to reject task");
+      }
+    }
+
+    setDisableButtons(false);
+  };
+
   const ActionHistory = () => (
     <div className="flex flex-col gap-4">
       <span className="text-2xl text-slate-600 font-semibold">
         Action history
       </span>
-      <div className="flex flex-col gap-2 h-32 overflow-y-scroll">
+      <div className="flex flex-col gap-2 max-h-32 overflow-y-scroll">
         {actionHistory.length === 0 && <span>No actions yet</span>}
 
         {actionHistory.map(
           ({ name, description, isSubmission, isReview, date }) => (
             <div
-              className={`flex flex-row justify-between items-center rounded-lg p-2 border-2 ${
-                isSubmission ? "border-main-blue" : "border-yellow-500"
-              } border-slate-200`}
+              className={`flex flex-col rounded-lg p-2 border-2 ${
+                isSubmission ? "border-slate-200" : "border-dark-blue"
+              }`}
             >
-              <div className="flex items-center text-slate-500 text-sm">
-                <span className="w-32 truncate">{name}</span>
-                <span className="text-justify line-clamp-3">{description}</span>
+              <div className="flex flex-row justify-between items-center gap-4">
+                <div className="flex items-center text-slate-500 text-sm">
+                  <span className="w-32 truncate">{name}</span>
+                </div>
+                <div className="flex items-center text-slate-500 text-sm">
+                  <span>{date.toLocaleDateString()}</span>
+                </div>
               </div>
-              <div className="flex items-center text-slate-500 text-sm">
-                <span>{date.toISOString()}</span>
-              </div>
+              <span className="text-justify">{description}</span>
             </div>
           )
         )}
@@ -94,15 +159,53 @@ export const TaskStatusContainer = ({
 
       {isStarted && !isRejected && !isCompleted && isUserAssigned && (
         <div className="mt-2">
-          <ButtonContainer onClick={() => {}}>
-            Submit work for review
+          <ButtonContainer
+            onClick={() =>
+              navigate(`/organization/${organizationId}/tasks/${taskId}/submit`)
+            }
+          >
+            Submit work
           </ButtonContainer>
+        </div>
+      )}
+
+      {!isStarted && isUserTeacher && (
+        <div className="flex w-full h-full justify-center items-center">
+          <button
+            disabled={disableButtons}
+            className={`${
+              disableButtons ? "opacity-75" : ""
+            } bg-dark-blue py-4 w-72 md:w-full rounded-lg text-white text-lg font-bold`}
+            onClick={approveStart}
+          >
+            Approve start
+          </button>
+        </div>
+      )}
+
+      {!isStarted && isUserTeacher && (
+        <div className="flex w-full h-full justify-center items-center">
+          <button
+            disabled={disableButtons}
+            className={`${
+              disableButtons ? "opacity-75" : ""
+            } border-dark-blue border-2 text-dark-blue py-4 w-72 md:w-full rounded-lg text-lg font-bold`}
+            onClick={rejectStart}
+          >
+            Reject start
+          </button>
         </div>
       )}
 
       {isStarted && !isRejected && !isCompleted && isUserTeacher && (
         <div className="mt-2">
-          <ButtonContainer onClick={() => {}}>Review work</ButtonContainer>
+          <ButtonContainer
+            onClick={() =>
+              navigate(`/organization/${organizationId}/tasks/${taskId}/review`)
+            }
+          >
+            Review work
+          </ButtonContainer>
         </div>
       )}
     </div>

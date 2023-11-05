@@ -48,6 +48,11 @@ export type BackEndContext = {
     page: number,
     count: number
   ) => Promise<TaskListData>;
+  getOrganizationUsers: (
+    organizationId: string,
+    page: number,
+    count: number
+  ) => Promise<UserListData>;
   getUserOrganizations: (
     token: string,
     page: number,
@@ -107,24 +112,37 @@ export type BackEndContext = {
     page: number,
     count: number
   ) => Promise<TaskActionListData>;
-  approveStartTask: (organizationId: string, taskId: string) => Promise<void>;
-  rejectStartTask: (organizationId: string, taskId: string) => Promise<void>;
+  approveStartTask: (
+    token: string,
+    organizationId: string,
+    taskId: string
+  ) => Promise<void>;
+  rejectStartTask: (
+    token: string,
+    organizationId: string,
+    taskId: string
+  ) => Promise<void>;
   submitTask: (
+    token: string,
     organizationId: string,
     taskId: string,
     name: string,
     description: string
   ) => Promise<void>;
   submissionApproveTask: (
+    token: string,
     organizationId: string,
-    taskId: string
+    taskId: string,
+    description: string
   ) => Promise<void>;
   submissionRejectTask: (
+    token: string,
     organizationId: string,
     taskId: string,
     description: string
   ) => Promise<void>;
   submissionReviewTask: (
+    token: string,
     organizationId: string,
     taskId: string,
     description: string
@@ -282,6 +300,28 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
           deadline: new Date(task.deadline),
           date: new Date(task.creation_date),
           status: status,
+        };
+      }),
+    };
+  };
+
+  const getOrganizationUsers = async (
+    organizationId: string,
+    page: number,
+    count: number
+  ) => {
+    const response = await api.get(
+      `/organization/${organizationId}/users?page=${page}&count=${count}`
+    );
+
+    return {
+      currentPage: response.data.currentPage,
+      maxPage: response.data.max_page,
+      elements: response.data.users.map((user: any) => {
+        return {
+          ...user,
+          userType: user.type,
+          stakeAddress: user.stake_address,
         };
       }),
     };
@@ -539,33 +579,59 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
-  const approveStartTask = async (organizationId: string, taskId: string) => {
+  const approveStartTask = async (
+    token: string,
+    organizationId: string,
+    taskId: string
+  ) => {
     await api.post(
-      `/organization/${organizationId}/task/${taskId}/start/approve`
+      `/organization/${organizationId}/task/${taskId}/start/approve`,
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return;
   };
 
-  const rejectStartTask = async (organizationId: string, taskId: string) => {
+  const rejectStartTask = async (
+    token: string,
+    organizationId: string,
+    taskId: string
+  ) => {
     await api.post(
-      `/organization/${organizationId}/task/${taskId}/start/reject`
+      `/organization/${organizationId}/task/${taskId}/start/reject`,
+      {},
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return;
   };
 
   const submitTask = async (
+    token: string,
     organizationId: string,
     taskId: string,
     name: string,
     description: string
   ) => {
     await api.post(
-      `/organization/${organizationId}/task/${taskId}/start/reject`,
+      `/organization/${organizationId}/task/${taskId}/submission`,
       {
         name: name,
         description: description,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       }
     );
 
@@ -573,17 +639,28 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const submissionApproveTask = async (
+    token: string,
     organizationId: string,
-    taskId: string
+    taskId: string,
+    description: string
   ) => {
     await api.post(
-      `/organization/${organizationId}/task/${taskId}/submission/approve`
+      `/organization/${organizationId}/task/${taskId}/submission/approve`,
+      {
+        description: description,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
     );
 
     return;
   };
 
   const submissionRejectTask = async (
+    token: string,
     organizationId: string,
     taskId: string,
     description: string
@@ -592,6 +669,11 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       `/organization/${organizationId}/task/${taskId}/submission/reject`,
       {
         description: description,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       }
     );
 
@@ -599,6 +681,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const submissionReviewTask = async (
+    token: string,
     organizationId: string,
     taskId: string,
     description: string
@@ -607,6 +690,11 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       `/organization/${organizationId}/task/${taskId}/submission/review`,
       {
         description: description,
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
       }
     );
 
@@ -623,6 +711,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         createOrganization,
         getOrganization,
         getOrganizationTasks,
+        getOrganizationUsers,
         getUserOrganizations,
         joinOrganization,
         createGroup,

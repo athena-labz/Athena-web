@@ -70,7 +70,7 @@ type TaskActionListData = ListResponse<TaskActionData>;
 
 type OrganizationListData = ListResponse<OrganizationData>;
 type GroupMembersipListData = ListResponse<GroupMembersipData>;
-type UserListData = ListResponse<UserOrganizationData>;
+type UserListData = ListResponse<ExternalUserData>;
 
 
 type StudentReward = {

@@ -29,6 +29,8 @@ import "react-toastify/dist/ReactToastify.css";
 import CreateTaskPage from "./pages/CreateTaskPage";
 import OrganizationJoin from "./pages/OrganizationJoin";
 import GroupCreatePage from "./pages/GroupCreatePage";
+import SubmitWorkPage from "./pages/SubmitWorkPage";
+import ReviewWorkPage from "./pages/ReviewWorkPage";
 
 const RedirectToTasks = () => {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -82,6 +84,36 @@ const TasksRedirect = () => {
   );
 };
 
+type TaskSubmitRedirectParams = { organizationId: string; taskId: string };
+
+const TaskSubmitRedirect = () => {
+  const { organizationId, taskId } = useParams<TaskSubmitRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+  if (!taskId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage currentSelection="tasks">
+      <SubmitWorkPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
+type ReviewRedirectParams = { organizationId: string; taskId: string };
+
+const ReviewRedirect = () => {
+  const { organizationId, taskId } = useParams<ReviewRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+  if (!taskId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage currentSelection="tasks">
+      <ReviewWorkPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
 type ProfileRedirectParams = {
   organizationId: string;
 };
@@ -120,6 +152,26 @@ const GroupCreateRedirect = () => {
   return (
     <OrganizationPage currentSelection="profile">
       <GroupCreatePage organizationId={organizationId} />
+    </OrganizationPage>
+  );
+};
+
+type UsersRedirectParams = {
+  organizationId: string;
+};
+
+const UsersRedirect = () => {
+  const { organizationId } = useParams<UsersRedirectParams>();
+
+  if (!organizationId) {
+    console.error("Organization not defined in create group page");
+
+    return <NotFoundPage />
+  }
+
+  return (
+    <OrganizationPage currentSelection="users">
+      <UsersPage organizationId={organizationId} />
     </OrganizationPage>
   );
 };
@@ -210,6 +262,24 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/organization/:organizationId/tasks/:taskId/submit"
+                element={
+                  <ProtectedRoute>
+                    <TaskSubmitRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/tasks/:taskId/review"
+                element={
+                  <ProtectedRoute>
+                    <ReviewRedirect />
+                  </ProtectedRoute>
+                }
+              />
             </>
 
             <>
@@ -217,9 +287,7 @@ function App() {
                 path="/organization/:organizationId/users"
                 element={
                   <ProtectedRoute>
-                    <OrganizationPage currentSelection="users">
-                      <UsersPage />
-                    </OrganizationPage>
+                    <UsersRedirect />
                   </ProtectedRoute>
                 }
               />
