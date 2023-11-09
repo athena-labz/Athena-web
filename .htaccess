@@ -1,2 +1,2 @@
 DirectoryIndex index.html
-ErrorDocument 404 https://www.app.athenalabo.com
+ErrorDocument 404 /
