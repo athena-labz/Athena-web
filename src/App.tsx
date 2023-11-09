@@ -185,7 +185,7 @@ const UsersRedirect = () => {
 function App() {
   return (
     <BackEndProvider>
-      <WalletProvider networkMode="testnet">
+      <WalletProvider networkMode="mainnet">
         <UserProvider>
           <ToastContainer
             position="top-right"

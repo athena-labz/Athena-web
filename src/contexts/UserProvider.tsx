@@ -41,8 +41,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
 
-  const [signature, setSignature] = useState<StoredSignature | null>(null);
-
   const backEnd = useBackEnd()!;
   const wallet = useWallet()!;
 
@@ -59,16 +57,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     const currentDate = Math.floor(Date.now() / 1000);
     const stakeAddress = await wallet.getStakeAddress();
 
-    if (signature && signature.stakeAddress === stakeAddress) {
-      if (currentDate > signature.expire) {
-        setSignature(null);
-      } else {
-        return signature;
-      }
-    }
-
     const signedMessage = await wallet.signMessage(
-      `=====ONLY SIGN THIS IF YOU ARE IN athenateams.com=====${currentDate}`
+      `======ONLY SIGN IF YOU ARE IN app.athenalabo.com======${currentDate}`
     );
 
     const sig = {
@@ -77,7 +67,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       expire: currentDate + 30 * 60 * 60,
     };
 
-    setSignature(sig);
     return sig;
   };
 
@@ -102,7 +91,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const signOut = () => {
     localStorage.removeItem("@user");
     setUser(null);
-    setSignature(null);
   };
 
   const signIn = async () => {
