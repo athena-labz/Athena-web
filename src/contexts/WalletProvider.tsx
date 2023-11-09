@@ -127,6 +127,9 @@ export const WalletProvider = ({
   };
 
   const connect = async (wallet: string) => {
+    setCurrentWallet(null);
+    setCurrentFullWallet(null);
+    
     if (walletLoaded === false) {
       return Promise.reject("Cardano extensions not loaded yet.");
     } else if (wallets === null) {

@@ -47,6 +47,7 @@ export const SignInHandler = ({
         onHide={() => setWalletSelectorShow(false)}
         whitelistedWallets={whitelistedWallets}
         onConnectWallet={(wallet) => {
+          setWalletConnected(false);
           setWalletSelectorShow(false); // Close modal
 
           connect(wallet)
@@ -54,6 +55,7 @@ export const SignInHandler = ({
               setWalletConnected(true);
             })
             .catch((error: any) => {
+              setWalletConnected(false);
               if (error === undefined || error === null)
                 toast.error("User denied access to wallet");
               else if (
