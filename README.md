@@ -2,6 +2,8 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+To zip the file `zip -vr build.zip build/ -x "*.DS_Store"`
+
 ## Available Scripts
 
 In the project directory, you can run:

@@ -109,8 +109,13 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
       if (exists === undefined) return;
 
       if (exists) {
-        await loadAreas();
-        setStage("Area");
+        if (user.user!.userType === "student") {
+          await loadAreas();
+          setStage("Area");
+        } else {
+          joinOrganization();
+          setStage("NameAndPassword");
+        }
       } else {
         toast.error("Organization identifier not found!");
       }
