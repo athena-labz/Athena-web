@@ -27,7 +27,7 @@ export type BackEndContext = {
   ) => Promise<TaskListData>;
   signIn: (stakeAddress: string, signature: string) => Promise<string>;
   signUp: (
-    userType: "student" | "teacher" | "organizer",
+    userType: UserType,
     email: string,
     stakeAddress: string,
     signature: string
@@ -40,9 +40,11 @@ export type BackEndContext = {
     description: string,
     studentsPassword: string,
     teachersPassword: string,
+    supervisorPassword: string,
     areas: string[]
   ) => Promise<void>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
+  getOrganizationAreas: (organizationId: string) => Promise<string[]>;
   getOrganizationTasks: (
     organizationId: string,
     page: number,
@@ -220,7 +222,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const signUp = async (
-    userType: "student" | "teacher" | "organizer",
+    userType: UserType,
     email: string,
     stakeAddress: string,
     signature: string
@@ -243,6 +245,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     description: string,
     studentsPassword: string,
     teachersPassword: string,
+    supervisorPassword: string,
     areas: string[]
   ) => {
     await api.post(
@@ -254,6 +257,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         description: description,
         students_password: studentsPassword,
         teachers_password: teachersPassword,
+        supervisor_password: supervisorPassword,
         areas: areas,
       },
       {
@@ -271,6 +275,12 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       ...response.data,
       creationDate: new Date(response.data.creation_date),
     };
+  };
+
+  const getOrganizationAreas = async (organizationId: string) => {
+    const response = await api.get(`/organization/${organizationId}/areas`);
+
+    return response.data;
   };
 
   const getOrganizationTasks = async (
@@ -710,6 +720,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         signUp,
         createOrganization,
         getOrganization,
+        getOrganizationAreas,
         getOrganizationTasks,
         getOrganizationUsers,
         getUserOrganizations,

@@ -17,6 +17,7 @@ const CreateOrganizationForm = () => {
 
   const [studentsPassword, setStudentsPassword] = useState<string>("");
   const [teachersPassword, setTeachersPassword] = useState<string>("");
+  const [supervisorPassword, setSupervisorPassword] = useState<string>("");
 
   const [blockCreateButton, setBlockCreateButton] = useState<boolean>(false);
 
@@ -58,11 +59,12 @@ const CreateOrganizationForm = () => {
         description,
         studentsPassword,
         teachersPassword,
+        supervisorPassword,
         selectedAreas
       );
 
-      toast.success("Successfully created organization")
-      navigate(`/organization/${identifier}`)
+      toast.success("Successfully created organization");
+      navigate(`/organization/${identifier}`);
     } catch (error: any) {
       console.dir(error);
       if (error?.response?.data?.detail) {
@@ -155,32 +157,42 @@ const CreateOrganizationForm = () => {
         </div>
         <div className="flex flex-col gap-4">
           <span className="text-slate-600">
-            Here you need to specify two passwords. They will be used to enter
+            Here you need to specify three passwords. They will be used to enter
             the organization. One will allow the user to be recognized as a
-            "teacher", the other as a "student".
+            "teacher", the other as a "student" and the other as a "supervisor".
           </span>
           <span className="text-slate-600">
             Remember these passwords, anyone who wants to join the organization
-            will need to know them.
+            will need to know them. And be careful not to share them.
           </span>
           <div className="flex flex-col gap-2">
-            <span>For the teachers</span>
+            <span>For the students</span>
             <input
               className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
-              placeholder="**********"
-              type="password"
+              placeholder=""
+              type="text"
               value={studentsPassword}
               onChange={(e) => setStudentsPassword(e.target.value)}
             />
           </div>
           <div className="flex flex-col gap-2">
-            <span>For the students</span>
+            <span>For the teachers</span>
             <input
               className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
-              placeholder="**********"
-              type="password"
+              placeholder=""
+              type="text"
               value={teachersPassword}
               onChange={(e) => setTeachersPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <span>For the supervisor</span>
+            <input
+              className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
+              placeholder=""
+              type="text"
+              value={supervisorPassword}
+              onChange={(e) => setSupervisorPassword(e.target.value)}
             />
           </div>
         </div>

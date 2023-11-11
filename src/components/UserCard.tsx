@@ -4,7 +4,7 @@ import { Avatar } from "./User";
 type UserCardProps = {
   email: string;
   stakeAddress: string;
-  userType: "student" | "teacher" | "organizer";
+  userType: UserType;
 };
 
 export const UserCard = ({ email, stakeAddress, userType }: UserCardProps) => {

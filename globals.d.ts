@@ -1,13 +1,15 @@
 // globals.d.ts
 
+type UserType = "student" | "teacher" | "organizer" | "supervisor";
+
 type ExternalUserData = {
-  userType: "student" | "teacher" | "organizer";
+  userType: UserType;
   email: string;
   stakeAddress: string;
 };
 
 type UserData = {
-  userType: "student" | "teacher" | "organizer";
+  userType: UserType;
   email: string;
   stakeAddress: string;
   token: string;

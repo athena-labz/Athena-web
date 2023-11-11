@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useWallet, WalletContext } from "../contexts/WalletProvider";
 import { useUser, UserContext } from "../contexts/UserProvider";
 
+import { capitalize } from "../utils/stringHelpers";
+
 import Header from "../components/Header";
 import { BackEndContext, useBackEnd } from "../contexts/BackEndProvider";
 import { toast } from "react-toastify";
@@ -30,25 +32,40 @@ const reduceAreas = (areas: string[]) => {
 const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
   const [identifier, setIdentifier] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const [areas, setAreas] = useState<string[] | null>(null);
   const [area, setArea] = useState<string>("");
+
+  const [stage, setStage] = useState<"NameAndPassword" | "Area">(
+    "NameAndPassword"
+  );
 
   const navigate = useNavigate();
 
-  const joinOrganization = async () => {
-    if (user.user === null) {
-      toast.error("Tried to join organization while signed out");
-    }
+  // useEffect(() => {
+  //   loadAreas();
+  // }, []);
 
+  const organizationExists = async () => {
     try {
       const organization = await backend.getOrganization(identifier);
-      if (!organization.areas.includes(area)) {
-        toast.error(
-          `Area not among the organization areas! Select one of "${reduceAreas(
-            organization.areas
-          )}"`
-        );
-        return;
+      return true;
+    } catch (error: any) {
+      if (error?.response?.status === 404) {
+        return false;
+      } else if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        toast.error("Server error while trying to get organization tasks");
       }
+    }
+  };
+
+  const loadAreas = async () => {
+    try {
+      const organizationAreas = await backend.getOrganizationAreas(identifier);
+      setAreas(organizationAreas);
+      setArea(organizationAreas[0]);
     } catch (error: any) {
       if (error?.response?.data?.detail) {
         toast.error(`Server error: ${error.response.data.detail}`);
@@ -59,9 +76,21 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
         );
       }
     }
+  };
+
+  const joinOrganization = async () => {
+    if (user.user === null) {
+      toast.error("Tried to join organization while signed out");
+      return;
+    }
 
     try {
-      await backend.joinOrganization(user.user!.token, identifier, area, password);
+      await backend.joinOrganization(
+        user.user.token,
+        identifier,
+        user.user.userType === "student" ? area : null,
+        password
+      );
       navigate(`/organization/${identifier}`);
     } catch (error: any) {
       if (error?.response?.data?.detail) {
@@ -70,6 +99,24 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
         console.error(error);
         toast.error("Server error while trying to join organization");
       }
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (stage === "NameAndPassword") {
+      const exists = await organizationExists();
+
+      if (exists === undefined) return;
+
+      if (exists) {
+        await loadAreas();
+        setStage("Area");
+      } else {
+        toast.error("Organization identifier not found!");
+      }
+    } else {
+      joinOrganization();
+      setStage("NameAndPassword");
     }
   };
 
@@ -85,15 +132,34 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
             onChange={(e) => setIdentifier(e.target.value)}
           />
         </div>
-        <div className="flex flex-col gap-2">
-          <span>What is you area?</span>
-          <input
-            className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
-            placeholder="Math"
-            value={area}
-            onChange={(e) => setArea(e.target.value)}
-          />
-        </div>
+
+        {stage === "Area" &&
+          (areas ? (
+            <div className="flex flex-col gap-2">
+              <span>What is your area?</span>
+              <select
+                name="user_types"
+                value={area}
+                onChange={(event) => setArea(event.target.value)}
+                className="p-4 bg-opposite-pale border-2 text-black rounded-lg"
+              >
+                {areas.map((orgArea) => (
+                  <option value={orgArea}>{capitalize(orgArea)}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <span>What is your area?</span>
+              <input
+                className="p-4 bg-opposite-pale border-400 border-2 text-black rounded-lg"
+                placeholder="Math"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+              />
+            </div>
+          ))}
+
         <div className="flex flex-col gap-2">
           <span>Password</span>
           <input
@@ -115,7 +181,7 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
         </button>
         <button
           className="bg-dark-blue py-4 w-full md:w-72 rounded-lg text-white text-lg md:text-2xl font-bold"
-          onClick={joinOrganization}
+          onClick={handleConfirm}
         >
           Confirm
         </button>
@@ -127,6 +193,13 @@ const OrganizationJoinForm = ({ backend, user }: OrganizationJoinFormProps) => {
 const OrganizationJoin = () => {
   const backend = useBackEnd()!;
   const user = useUser()!;
+
+  const navigate = useNavigate();
+
+  if (user.user === null) {
+    toast.error("Tried to join organization while signed out");
+    navigate("/signin");
+  }
 
   return (
     <div className="">

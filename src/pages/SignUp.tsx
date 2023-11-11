@@ -17,9 +17,7 @@ type SignUpFormProps = {
 };
 
 const SignUpForm = ({ wallet, user }: SignUpFormProps) => {
-  const [userType, setUserType] = useState<"student" | "teacher" | "organizer">(
-    "student"
-  );
+  const [userType, setUserType] = useState<UserType>("student");
   const [email, setEmail] = useState<string>("");
 
   const [waitForSignUp, setWaitForSignUp] = useState<boolean>(false);
@@ -50,8 +48,9 @@ const SignUpForm = ({ wallet, user }: SignUpFormProps) => {
             className="p-4 bg-opposite-pale border-2 text-slate-600 rounded-lg"
           >
             <option value="student">Student</option>
-            <option value="organizer">Organizer</option>
             <option value="teacher">Teacher</option>
+            <option value="organizer">Organizer</option>
+            <option value="supervisor">Supervisor</option>
           </select>
         </div>
 

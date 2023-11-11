@@ -18,7 +18,7 @@ export type UserContext = {
   user: UserData | null;
   signIn: () => Promise<boolean>;
   signUp: (
-    userType: "student" | "teacher" | "organizer",
+    userType: UserType,
     email: string
   ) => Promise<boolean>;
   signOut: () => void;
@@ -124,7 +124,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   };
 
   const signUp = async (
-    userType: "student" | "teacher" | "organizer",
+    userType: UserType,
     email: string
   ) => {
     const signature = await getSignature();
