@@ -100,11 +100,15 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       const token = await backEnd.signIn(
         signature.stakeAddress,
         signature.signature.key +
-          "H1+DFJCghAmokzYG" +
-          signature.signature.signature
+        "H1+DFJCghAmokzYG" +
+        signature.signature.signature
       );
 
       const user = await backEnd.getUserInformation(token);
+      if (user.paymentAddress === null) {
+        const paymentAddress = await wallet.getChangeAddress();
+        await backEnd.savePaymentAddress(token, paymentAddress);
+      }
 
       saveUser(user);
       toast.success("Signed in successfully!");
@@ -112,7 +116,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       return true;
     } catch (error: any) {
       console.error(error);
-      
+
       if (error?.response?.data?.detail) {
         toast.error(`Server error: ${error.response.data.detail}`);
       } else {
@@ -136,22 +140,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           email,
           signature.stakeAddress,
           signature.signature.key +
-            "H1+DFJCghAmokzYG" +
-            signature.signature.signature
+          "H1+DFJCghAmokzYG" +
+          signature.signature.signature
         );
 
         try {
           const token = await backEnd.signIn(
             signature.stakeAddress,
             signature.signature.key +
-              "H1+DFJCghAmokzYG" +
-              signature.signature.signature
+            "H1+DFJCghAmokzYG" +
+            signature.signature.signature
           );
 
           saveUser({
             userType: userType,
             email: email,
             stakeAddress: signature.stakeAddress,
+            paymentAddress: null,
             token: token,
           });
 

@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 import { LoadingIcon } from "../components/LoadingIcon";
 
 type OrganizationPageProps = {
-  currentSelection: "tasks" | "users" | "profile";
+  currentSelection: "tasks" | "crowdfunding" | "users" | "profile";
   organizationId: string;
   children: ReactNode;
 };

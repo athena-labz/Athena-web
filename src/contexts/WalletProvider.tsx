@@ -20,6 +20,7 @@ export type WalletContext = {
   getWallets: () => Cardano | null;
   connect: (wallet: string) => Promise<void>;
   getStakeAddress: () => Promise<string>;
+  getChangeAddress: () => Promise<string>;
   signMessage: (message: string) => Promise<SignedMessage>;
 };
 
@@ -164,6 +165,26 @@ export const WalletProvider = ({
     return address;
   };
 
+  const getChangeAddress = async () => {
+    if (!walletLoaded) {
+      return Promise.reject("Wallet not loaded yet!");
+    }
+
+    if (!currentFullWallet) {
+      return Promise.reject("No wallet was selected!");
+    }
+
+    lucid!.selectWallet(currentFullWallet);
+
+    const address = await lucid!.wallet.address();
+
+    if (address === null) {
+      return Promise.reject("Selected wallet does not have change address");
+    }
+
+    return address;
+  };
+
   const signMessage = async (message: string) => {
     if (!walletLoaded) {
       return Promise.reject("Wallet not loaded yet!");
@@ -195,6 +216,7 @@ export const WalletProvider = ({
         getWallets: () => wallets,
         connect,
         getStakeAddress,
+        getChangeAddress,
         signMessage,
       }}
     >

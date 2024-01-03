@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export type CurrentSideBarSelection =
   | "tasks"
+  | "crowdfunding"
   | "users"
   | "profile"
   | "SpecificTask"
@@ -63,21 +64,6 @@ const Sidebar = ({ currentSelection, organizationName }: SidebarProps) => {
     setShowSidebar(!showSidebar);
   };
 
-  const HideShowButton = () => {
-    return (
-      <div className="fixed z-20 bottom-2 left-0 right-0 flex justify-center">
-        <div
-          className="flex flex-col hover:cursor-pointer"
-          onClick={() => toggleSidebar()}
-        >
-          <span className="uppercase font-extrabold text-xs text-[#BEBEC7]">
-            {showSidebar ? "Hide" : "Show"}
-          </span>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div>
       {showSidebar && (
@@ -96,6 +82,13 @@ const Sidebar = ({ currentSelection, organizationName }: SidebarProps) => {
               iconName="task"
               selected={currentSelection === "tasks"}
               onSelect={() => navigate(`/organization/${organizationId}/tasks`)}
+            />
+
+            <SidebarSelectionContainer
+              title="Crowdfunding"
+              iconName="crowdfunding"
+              selected={currentSelection === "crowdfunding"}
+              onSelect={() => navigate(`/organization/${organizationId}/crowdfunding`)}
             />
 
             <SidebarSelectionContainer
@@ -128,8 +121,6 @@ const Sidebar = ({ currentSelection, organizationName }: SidebarProps) => {
           </ul>
         </div>
       )}
-
-      <HideShowButton />
     </div>
   );
 };

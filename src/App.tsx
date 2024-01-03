@@ -31,6 +31,9 @@ import OrganizationJoin from "./pages/OrganizationJoin";
 import GroupCreatePage from "./pages/GroupCreatePage";
 import SubmitWorkPage from "./pages/SubmitWorkPage";
 import ReviewWorkPage from "./pages/ReviewWorkPage";
+import CrowdfundingPage from "./pages/CrowdfundingPage";
+import CreateCrowdfundingPage from "./pages/CreateCrowdfundingPage";
+import SpecificCrowdfundingPage from "./pages/SpecficCrowdfundingPage";
 
 const RedirectToTasks = () => {
   const { organizationId } = useParams<{ organizationId: string }>();
@@ -56,6 +59,22 @@ const SpecificTaskRedirect = () => {
   );
 };
 
+const SpecificCrowdfundingRedirect = () => {
+  const { organizationId, taskId } = useParams<SpecificTaskRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+
+  if (!taskId) {
+    return <CrowdfundingRedirect />;
+  }
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="crowdfunding">
+      <SpecificCrowdfundingPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
 type CreateTaskRedirectParams = { organizationId: string };
 
 const CreateTaskRedirect = () => {
@@ -70,6 +89,18 @@ const CreateTaskRedirect = () => {
   );
 };
 
+const CreateCrowdfundingRedirect = () => {
+  const { organizationId } = useParams<CreateTaskRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="crowdfunding">
+      <CreateCrowdfundingPage organizationId={organizationId} />
+    </OrganizationPage>
+  );
+}
+
 type TasksRedirectParams = { organizationId: string };
 
 const TasksRedirect = () => {
@@ -83,6 +114,18 @@ const TasksRedirect = () => {
     </OrganizationPage>
   );
 };
+
+const CrowdfundingRedirect = () => {
+  const { organizationId } = useParams<TasksRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="crowdfunding">
+      <CrowdfundingPage organizationId={organizationId} />
+    </OrganizationPage>
+  );
+}
 
 type TaskSubmitRedirectParams = { organizationId: string; taskId: string };
 
@@ -256,6 +299,33 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CreateTaskRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/crowdfunding"
+                element={
+                  <ProtectedRoute>
+                    <CrowdfundingRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/crowdfunding/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateCrowdfundingRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/crowdfunding/:taskId"
+                element={
+                  <ProtectedRoute>
+                    <SpecificCrowdfundingRedirect />
                   </ProtectedRoute>
                 }
               />

@@ -32,6 +32,7 @@ export type BackEndContext = {
     stakeAddress: string,
     signature: string
   ) => Promise<void>;
+  savePaymentAddress: (token: string, address: string) => Promise<void>;
   createOrganization: (
     token: string,
     type: "groups" | "individual",
@@ -48,7 +49,8 @@ export type BackEndContext = {
   getOrganizationTasks: (
     organizationId: string,
     page: number,
-    count: number
+    count: number,
+    type: 'all' | 'individual' | 'group'
   ) => Promise<TaskListData>;
   getOrganizationUsers: (
     organizationId: string,
@@ -103,11 +105,23 @@ export type BackEndContext = {
     rewards: { [email: string]: number },
     deadline: Date
   ) => Promise<void>;
+  createCrowdfundingTask: (
+    token: string,
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string,
+    deadline: Date
+  ) => Promise<void>;
   getTask: (organizationId: string, taskId: string) => Promise<TaskData>;
   getTaskMembers: (
     organizationId: string,
     taskId: string
   ) => Promise<ExternalUserData[]>;
+  getTaskOwner: (
+    organizationId: string,
+    taskId: string
+  ) => Promise<ExternalUserData>;
   getTaskActions: (
     organizationId: string,
     taskId: string,
@@ -169,6 +183,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       userType: response.data.type,
       email: response.data.email,
       stakeAddress: response.data.stake_address,
+      paymentAddress: response.data.payment_address,
       token: token,
     };
   };
@@ -237,6 +252,22 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     return;
   };
 
+  const savePaymentAddress = async (
+    token: string,
+    address: string
+  ) => {
+    const response = await api.post("/users/me/address/add", {
+      address: address
+    },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+
+    return;
+  };
+
   const createOrganization = async (
     token: string,
     type: "groups" | "individual",
@@ -286,10 +317,20 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   const getOrganizationTasks = async (
     organizationId: string,
     page: number,
-    count: number
+    count: number,
+    type: 'all' | 'individual' | 'group'
   ) => {
+    let extraParams: string;
+    if (type === 'all') {
+      extraParams = '';
+    } else if (type === 'individual') {
+      extraParams = '&individual=true';
+    } else {
+      extraParams = '&group=true';
+    }
+
     const response = await api.get(
-      `/organization/${organizationId}/tasks?page=${page}&count=${count}`
+      `/organization/${organizationId}/tasks?page=${page}&count=${count}${extraParams}`
     );
 
     return {
@@ -310,6 +351,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
           deadline: new Date(task.deadline),
           date: new Date(task.creation_date),
           status: status,
+          type: task.is_individual ? 'individual' : 'group'
         };
       }),
     };
@@ -528,6 +570,32 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     return;
   };
 
+  const createCrowdfundingTask = async (
+    token: string,
+    organizationId: string,
+    taskId: string,
+    name: string,
+    description: string,
+    deadline: Date
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/create`,
+      {
+        identifier: taskId,
+        name: name,
+        description: description,
+        deadline: deadline.toISOString(),
+      },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return;
+  };
+
   const getTask = async (organizationId: string, taskId: string) => {
     const response = await api.get(
       `/organization/${organizationId}/task/${taskId}`
@@ -563,6 +631,18 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       email: user.email,
       stakeAddress: user.stake_address,
     }));
+  };
+
+  const getTaskOwner = async (organizationId: string, taskId: string) => {
+    const response = await api.get(
+      `/organization/${organizationId}/task/${taskId}/owner`
+    );
+
+    return {
+      userType: response.data.type,
+      email: response.data.email,
+      stakeAddress: response.data.stake_address,
+    }
   };
 
   const getTaskActions = async (
@@ -718,6 +798,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         getUserTasks,
         signIn,
         signUp,
+        savePaymentAddress,
         createOrganization,
         getOrganization,
         getOrganizationAreas,
@@ -731,8 +812,10 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         rejectGroup,
         leaveGroup,
         createTask,
+        createCrowdfundingTask,
         getTask,
         getTaskMembers,
+        getTaskOwner,
         getTaskActions,
         approveStartTask,
         rejectStartTask,

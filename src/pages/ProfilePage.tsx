@@ -104,13 +104,14 @@ const TasksContainer = ({
             )}
 
             {userTasks.elements.map(
-              ({ identifier, name, description, status, date }) => (
+              ({ identifier, name, description, status, date, type }) => (
                 <ProjectCard
                   projectId={identifier}
                   name={name}
                   description={description}
                   status={status as TaskStatus}
                   date={date}
+                  type={type}
                 />
               )
             )}

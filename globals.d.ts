@@ -12,6 +12,7 @@ type UserData = {
   userType: UserType;
   email: string;
   stakeAddress: string;
+  paymentAddress: string | null,
   token: string;
 };
 
@@ -44,6 +45,7 @@ type TaskData = {
   deadline: Date;
   status: TaskStatus;
   date: Date;
+  type: 'individual' | 'group'
 };
 
 type TaskActionData = {

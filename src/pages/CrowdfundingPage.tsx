@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import { LoadingIcon } from "../components/LoadingIcon";
 import { toast } from "react-toastify";
 
-type TasksPageProps = {
+type CrowdfundingPageProps = {
   organizationId: string;
 };
 
-const TasksPage = ({ organizationId }: TasksPageProps) => {
+const CrowdfundingPage = ({ organizationId }: CrowdfundingPageProps) => {
   const [tasksList, setTasksList] = useState<TaskListData | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
@@ -27,7 +27,7 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
         organizationId,
         page,
         10,
-        'group'
+        'individual'
       );
       setTasksList(taskList);
     } catch (error: any) {
@@ -42,11 +42,11 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
   return (
     <div className="w-full p-8 inline-block">
       <div className="p-4 mb-8 flex flex-row justify-between items-center">
-        <h1 className="text-4xl text-slate-600 font-semibold">Tasks</h1>
+        <h1 className="text-4xl text-slate-600 font-semibold">Crowdfunding Tasks</h1>
         <div className="flex justify-end">
           <div
             onClick={() =>
-              navigate(`/organization/${organizationId}/tasks/create`)
+              navigate(`/organization/${organizationId}/crowdfunding/create`)
             }
             className="p-4 mb-4 hover:cursor-pointer flex flex-row gap-2 items-center bg-dark-blue rounded-lg"
           >
@@ -78,8 +78,8 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
                     name={name}
                     description={description}
                     status={status as TaskStatus}
-                    type={"group"}
                     date={date}
+                    type={"individual"}
                   />
                 )
               )}
@@ -121,4 +121,4 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
   );
 };
 
-export default TasksPage;
+export default CrowdfundingPage;
