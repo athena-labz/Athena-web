@@ -85,13 +85,6 @@ const Sidebar = ({ currentSelection, organizationName }: SidebarProps) => {
             />
 
             <SidebarSelectionContainer
-              title="Crowdfunding"
-              iconName="crowdfunding"
-              selected={currentSelection === "crowdfunding"}
-              onSelect={() => navigate(`/organization/${organizationId}/crowdfunding`)}
-            />
-
-            <SidebarSelectionContainer
               title="Users"
               iconName="group"
               selected={currentSelection === "users"}

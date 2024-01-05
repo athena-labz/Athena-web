@@ -304,33 +304,6 @@ function App() {
               />
 
               <Route
-                path="/organization/:organizationId/crowdfunding"
-                element={
-                  <ProtectedRoute>
-                    <CrowdfundingRedirect />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/organization/:organizationId/crowdfunding/create"
-                element={
-                  <ProtectedRoute>
-                    <CreateCrowdfundingRedirect />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
-                path="/organization/:organizationId/crowdfunding/:taskId"
-                element={
-                  <ProtectedRoute>
-                    <SpecificCrowdfundingRedirect />
-                  </ProtectedRoute>
-                }
-              />
-
-              <Route
                 path="/organization/:organizationId/tasks/:taskId"
                 element={
                   <ProtectedRoute>
