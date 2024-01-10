@@ -44,6 +44,7 @@ export type BackEndContext = {
     supervisorPassword: string,
     areas: string[]
   ) => Promise<void>;
+  getBalance: (token: string, organizationId: string) => Promise<BalanceData>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
   getOrganizationAreas: (organizationId: string) => Promise<string[]>;
   getOrganizationTasks: (
@@ -298,6 +299,23 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       }
     );
   };
+
+  const getBalance = async (token: string, organizationId: string) => {
+    const response = await api.get(`/users/me/organization/${organizationId}/balance`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+
+    return {
+      owed: response.data.owed,
+      available: response.data.available,
+      escrowed: response.data.escrowed,
+      claimed: response.data.claimed,
+      lastClaimDate: response.data.last_claim_date ? new Date(response.data.last_claim_date) : null,
+    };
+  }
 
   const getOrganization = async (organizationId: string) => {
     const response = await api.get(`/organization/${organizationId}`);
@@ -800,6 +818,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         signUp,
         savePaymentAddress,
         createOrganization,
+        getBalance,
         getOrganization,
         getOrganizationAreas,
         getOrganizationTasks,
