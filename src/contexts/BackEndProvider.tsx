@@ -129,6 +129,7 @@ export type BackEndContext = {
     page: number,
     count: number
   ) => Promise<TaskActionListData>;
+  fundTask: (token: string, organizationId: string, taskId: string, amount: number) => Promise<void>;
   approveStartTask: (
     token: string,
     organizationId: string,
@@ -687,6 +688,25 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
+  const fundTask = async (
+    token: string,
+    organizationId: string,
+    taskId: string,
+    amount: number
+  ) => {
+    await api.post(
+      `/organization/${organizationId}/task/${taskId}/fund`,
+      { amount: amount },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return;
+  }
+
   const approveStartTask = async (
     token: string,
     organizationId: string,
@@ -836,6 +856,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         getTaskMembers,
         getTaskOwner,
         getTaskActions,
+        fundTask,
         approveStartTask,
         rejectStartTask,
         submitTask,

@@ -358,21 +358,6 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
                       <span>Credit escrowed: </span>
                       <span>{userBalance.escrowed}</span>
                     </div>
-                    <div className="flex flex-row gap-4 justify-between">
-                      <span>Already claimed: </span>
-                      <span>{userBalance.claimed}</span>
-                    </div>
-                  </div>
-                  <hr className="mt-2" />
-                  <div>
-                    {userBalance.lastClaimDate ? (
-                      <div>
-                        <span>Last claim at: </span>
-                        <span>{userBalance.lastClaimDate!.toISOString()}</span>
-                      </div>
-                    ) : (
-                      <span>Nothing claimed yet</span>
-                    )}
                   </div>
                 </div>
               </div>
