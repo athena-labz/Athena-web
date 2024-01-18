@@ -233,7 +233,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     form.append("username", stakeAddress);
     form.append("password", signature);
 
-    const response = await api.post("/token", form);
+    const response = await api.post("/users/login", form);
 
     return response.data["access_token"];
   };
