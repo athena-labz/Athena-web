@@ -218,7 +218,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     form.append("username", stakeAddress);
     form.append("password", signature);
 
-    const response = await axios.post("/api/token", form);
+    const response = await axios.post("/api/users/login", form);
 
     return response.data["access_token"];
   };
