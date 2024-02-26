@@ -1,21 +1,8 @@
 import * as React from "react";
 
 import { createContext, useState, useContext, useEffect } from "react";
-import {
-  taskListSample,
-  userListSample,
-  taskContentSample,
-  userDataSample,
-  submissionHistorySample,
-} from "../assets/samples";
 
 import axios from "axios";
-import { v4 as uuidv4 } from "uuid";
-
-const api = axios.create({
-  baseURL: process.env.REACT_APP_BASE_URL,
-  timeout: 1000,
-});
 
 export type BackEndContext = {
   getUserInformation: (token: string) => Promise<UserData>;
@@ -173,7 +160,7 @@ export const BackEnd = createContext<BackEndContext | null>(null);
 
 export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   const getUserInformation = async (token: string) => {
-    const response = await api.get("/users/me", {
+    const response = await axios.get("/api/users/me", {
       headers: {
         Authorization: "Bearer " + token,
       },
@@ -194,8 +181,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     page: number,
     count: number
   ) => {
-    const response = await api.get(
-      `/users/me/organization/${organizationId}/tasks?page=${page}&count=${count}`,
+    const response = await axios.get(
+      `/api/users/me/organization/${organizationId}/tasks?page=${page}&count=${count}`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -231,7 +218,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     form.append("username", stakeAddress);
     form.append("password", signature);
 
-    const response = await api.post("/token", form);
+    const response = await axios.post("/api/token", form);
 
     return response.data["access_token"];
   };
@@ -242,7 +229,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     stakeAddress: string,
     signature: string
   ) => {
-    const response = await api.post("/users/register", {
+    const response = await axios.post("/api/users/register", {
       user_type: userType,
       email: email,
       stake_address: stakeAddress,
@@ -256,7 +243,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     token: string,
     address: string
   ) => {
-    const response = await api.post("/users/me/address/add", {
+    const response = await axios.post("/api/users/me/address/add", {
       address: address
     },
       {
@@ -279,8 +266,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     supervisorPassword: string,
     areas: string[]
   ) => {
-    await api.post(
-      "/organization/create",
+    await axios.post(
+      "/api/organization/create",
       {
         organization_type: type,
         identifier: idenitifer,
@@ -300,7 +287,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const getOrganization = async (organizationId: string) => {
-    const response = await api.get(`/organization/${organizationId}`);
+    const response = await axios.get(`/api/organization/${organizationId}`);
 
     return {
       ...response.data,
@@ -309,7 +296,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const getOrganizationAreas = async (organizationId: string) => {
-    const response = await api.get(`/organization/${organizationId}/areas`);
+    const response = await axios.get(`/api/organization/${organizationId}/areas`);
 
     return response.data;
   };
@@ -329,8 +316,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       extraParams = '&group=true';
     }
 
-    const response = await api.get(
-      `/organization/${organizationId}/tasks?page=${page}&count=${count}${extraParams}`
+    const response = await axios.get(
+      `/api/organization/${organizationId}/tasks?page=${page}&count=${count}${extraParams}`
     );
 
     return {
@@ -362,8 +349,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     page: number,
     count: number
   ) => {
-    const response = await api.get(
-      `/organization/${organizationId}/users?page=${page}&count=${count}`
+    const response = await axios.get(
+      `/api/organization/${organizationId}/users?page=${page}&count=${count}`
     );
 
     return {
@@ -384,8 +371,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     page: number,
     count: number
   ) => {
-    const response = await api.get(
-      `/users/me/organizations?page=${page}&count=${count}`,
+    const response = await axios.get(
+      `/api/users/me/organizations?page=${page}&count=${count}`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -411,8 +398,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     area: string | null,
     password: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/join`,
+    await axios.post(
+      `/api/organization/${organizationId}/join`,
       {
         password: password,
         area: area,
@@ -434,8 +421,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     name: string,
     members: string[]
   ) => {
-    await api.post(
-      `/organization/${organizationId}/group/create`,
+    await axios.post(
+      `/api/organization/${organizationId}/group/create`,
       {
         identifier: identifier,
         name: name,
@@ -457,8 +444,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     page: number,
     count: number
   ) => {
-    const response = await api.get(
-      `/users/me/organization/${organizationId}/groups?page=${page}&count=${count}`,
+    const response = await axios.get(
+      `/api/users/me/organization/${organizationId}/groups?page=${page}&count=${count}`,
       {
         headers: {
           Authorization: "Bearer " + token,
@@ -493,8 +480,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     organizationId: string,
     groupId: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/group/${groupId}/accept`,
+    await axios.post(
+      `/api/organization/${organizationId}/group/${groupId}/accept`,
       {},
       {
         headers: {
@@ -511,8 +498,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     organizationId: string,
     groupId: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/group/${groupId}/reject`,
+    await axios.post(
+      `/api/organization/${organizationId}/group/${groupId}/reject`,
       {},
       {
         headers: {
@@ -529,8 +516,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     organizationId: string,
     groupId: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/group/${groupId}/leave`,
+    await axios.post(
+      `/api/organization/${organizationId}/group/${groupId}/leave`,
       {},
       {
         headers: {
@@ -551,8 +538,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     rewards: { [email: string]: number },
     deadline: Date
   ) => {
-    await api.post(
-      `/organization/${organizationId}/group/task/create`,
+    await axios.post(
+      `/api/organization/${organizationId}/group/task/create`,
       {
         identifier: taskId,
         name: name,
@@ -578,8 +565,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     description: string,
     deadline: Date
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/create`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/create`,
       {
         identifier: taskId,
         name: name,
@@ -597,8 +584,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const getTask = async (organizationId: string, taskId: string) => {
-    const response = await api.get(
-      `/organization/${organizationId}/task/${taskId}`
+    const response = await axios.get(
+      `/api/organization/${organizationId}/task/${taskId}`
     );
 
     let status = "Awaiting";
@@ -622,8 +609,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const getTaskMembers = async (organizationId: string, taskId: string) => {
-    const response = await api.get(
-      `/organization/${organizationId}/task/${taskId}/members`
+    const response = await axios.get(
+      `/api/organization/${organizationId}/task/${taskId}/members`
     );
 
     return response.data.map((user: any) => ({
@@ -634,8 +621,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
   };
 
   const getTaskOwner = async (organizationId: string, taskId: string) => {
-    const response = await api.get(
-      `/organization/${organizationId}/task/${taskId}/owner`
+    const response = await axios.get(
+      `/api/api/organization/${organizationId}/task/${taskId}/owner`
     );
 
     return {
@@ -651,8 +638,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     page: number,
     count: number
   ) => {
-    const response = await api.get(
-      `/organization/${organizationId}/task/${taskId}/actions?page=${page}&count=${count}`
+    const response = await axios.get(
+      `/api/organization/${organizationId}/task/${taskId}/actions?page=${page}&count=${count}`
     );
 
     return {
@@ -674,8 +661,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     organizationId: string,
     taskId: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/start/approve`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/start/approve`,
       {},
       {
         headers: {
@@ -692,8 +679,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     organizationId: string,
     taskId: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/start/reject`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/start/reject`,
       {},
       {
         headers: {
@@ -712,8 +699,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     name: string,
     description: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/submission`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/submission`,
       {
         name: name,
         description: description,
@@ -734,8 +721,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     taskId: string,
     description: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/submission/approve`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/submission/approve`,
       {
         description: description,
       },
@@ -755,8 +742,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     taskId: string,
     description: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/submission/reject`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/submission/reject`,
       {
         description: description,
       },
@@ -776,8 +763,8 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     taskId: string,
     description: string
   ) => {
-    await api.post(
-      `/organization/${organizationId}/task/${taskId}/submission/review`,
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/submission/review`,
       {
         description: description,
       },
