@@ -622,7 +622,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
 
   const getTaskOwner = async (organizationId: string, taskId: string) => {
     const response = await axios.get(
-      `/api/api/organization/${organizationId}/task/${taskId}/owner`
+      `/api/organization/${organizationId}/task/${taskId}/owner`
     );
 
     return {
