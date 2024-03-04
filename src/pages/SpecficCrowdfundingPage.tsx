@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { Avatar } from "../components/User";
 import { LoadingIcon } from "../components/LoadingIcon";
-import { TaskStatusContainer } from "../components/TaskStatusContainer";
+import { CrowdfundingStatusContainer } from "../components/CrowdfundingStatusContainer";
 
 import { useBackEnd } from "../contexts/BackEndProvider";
 import { toast } from "react-toastify";
@@ -113,7 +113,7 @@ const SpecificCrowdfundingPage = ({
           />
 
           <div className="flex h-full items-start">
-            <TaskStatusContainer
+            <CrowdfundingStatusContainer
               organizationId={organizationId}
               taskId={taskId}
               actionHistory={taskActions}

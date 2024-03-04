@@ -30,7 +30,9 @@ import CreateTaskPage from "./pages/CreateTaskPage";
 import OrganizationJoin from "./pages/OrganizationJoin";
 import GroupCreatePage from "./pages/GroupCreatePage";
 import SubmitWorkPage from "./pages/SubmitWorkPage";
+import SubmitCrowdfundingWorkPage from "./pages/SubmitCrowdfundingWorkPage"
 import ReviewWorkPage from "./pages/ReviewWorkPage";
+import ReviewCrowdfundingWorkPage from "./pages/ReviewCrowdfundingWorkPage"
 import CrowdfundingPage from "./pages/CrowdfundingPage";
 import CreateCrowdfundingPage from "./pages/CreateCrowdfundingPage";
 import SpecificCrowdfundingPage from "./pages/SpecficCrowdfundingPage";
@@ -142,10 +144,23 @@ const TaskSubmitRedirect = () => {
   );
 };
 
-type ReviewRedirectParams = { organizationId: string; taskId: string };
+const CrowdfundingSubmitRedirect = () => {
+  const { organizationId, taskId } = useParams<TaskSubmitRedirectParams>();
 
-const ReviewRedirect = () => {
-  const { organizationId, taskId } = useParams<ReviewRedirectParams>();
+  if (!organizationId) return <NotFoundPage />;
+  if (!taskId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="crowdfunding">
+      <SubmitCrowdfundingWorkPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
+type TaskReviewRedirectParams = { organizationId: string; taskId: string };
+
+const TaskReviewRedirect = () => {
+  const { organizationId, taskId } = useParams<TaskReviewRedirectParams>();
 
   if (!organizationId) return <NotFoundPage />;
   if (!taskId) return <NotFoundPage />;
@@ -153,6 +168,19 @@ const ReviewRedirect = () => {
   return (
     <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <ReviewWorkPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
+const CrowdfundingReviewRedirect = () => {
+  const { organizationId, taskId } = useParams<TaskReviewRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+  if (!taskId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="tasks">
+      <ReviewCrowdfundingWorkPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
 };
@@ -295,19 +323,19 @@ function App() {
               />
 
               <Route
-                path="/organization/:organizationId/tasks/create"
+                path="/organization/:organizationId/crowdfunding"
                 element={
                   <ProtectedRoute>
-                    <CreateTaskRedirect />
+                    <CrowdfundingRedirect />
                   </ProtectedRoute>
                 }
               />
 
               <Route
-                path="/organization/:organizationId/crowdfunding"
+                path="/organization/:organizationId/tasks/create"
                 element={
                   <ProtectedRoute>
-                    <CrowdfundingRedirect />
+                    <CreateTaskRedirect />
                   </ProtectedRoute>
                 }
               />
@@ -322,19 +350,19 @@ function App() {
               />
 
               <Route
-                path="/organization/:organizationId/crowdfunding/:taskId"
+                path="/organization/:organizationId/tasks/:taskId"
                 element={
                   <ProtectedRoute>
-                    <SpecificCrowdfundingRedirect />
+                    <SpecificTaskRedirect />
                   </ProtectedRoute>
                 }
               />
 
               <Route
-                path="/organization/:organizationId/tasks/:taskId"
+                path="/organization/:organizationId/crowdfunding/:taskId"
                 element={
                   <ProtectedRoute>
-                    <SpecificTaskRedirect />
+                    <SpecificCrowdfundingRedirect />
                   </ProtectedRoute>
                 }
               />
@@ -349,10 +377,28 @@ function App() {
               />
 
               <Route
+                path="/organization/:organizationId/crowdfunding/:taskId/submit"
+                element={
+                  <ProtectedRoute>
+                    <CrowdfundingSubmitRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/organization/:organizationId/tasks/:taskId/review"
                 element={
                   <ProtectedRoute>
-                    <ReviewRedirect />
+                    <TaskReviewRedirect />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/organization/:organizationId/crowdfunding/:taskId/review"
+                element={
+                  <ProtectedRoute>
+                    <CrowdfundingReviewRedirect />
                   </ProtectedRoute>
                 }
               />
