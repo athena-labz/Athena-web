@@ -120,7 +120,7 @@ const SpecificCrowdfundingPage = ({
               isStarted={taskData.status !== "Awaiting"}
               isRejected={taskData.status === "Rejected"}
               isCompleted={taskData.status === "Approved"}
-              isUserAssigned={user.stakeAddress === taskOwner.stakeAddress}
+              isUserOwner={taskOwner.email === user.email}
               isUserTeacher={user.userType === "teacher"}
             />
           </div>

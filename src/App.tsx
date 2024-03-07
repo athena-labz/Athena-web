@@ -17,6 +17,7 @@ import OrganizationPage from "./pages/OrganizationPage";
 import SpecificTaskPage from "./pages/SpecficTaskPage";
 import TasksPage from "./pages/TasksPage";
 import ProfilePage from "./pages/ProfilePage";
+import FundTaskPage from "./pages/FundTaskPage";
 
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
@@ -181,6 +182,19 @@ const CrowdfundingReviewRedirect = () => {
   return (
     <OrganizationPage organizationId={organizationId} currentSelection="tasks">
       <ReviewCrowdfundingWorkPage organizationId={organizationId} taskId={taskId} />
+    </OrganizationPage>
+  );
+};
+
+const CrowdfundingFundRedirect = () => {
+  const { organizationId, taskId } = useParams<TaskReviewRedirectParams>();
+
+  if (!organizationId) return <NotFoundPage />;
+  if (!taskId) return <NotFoundPage />;
+
+  return (
+    <OrganizationPage organizationId={organizationId} currentSelection="crowdfunding">
+      <FundTaskPage organizationId={organizationId} taskId={taskId} />
     </OrganizationPage>
   );
 };
@@ -403,6 +417,15 @@ function App() {
                 }
               />
             </>
+
+            <Route
+              path="/organization/:organizationId/crowdfunding/:taskId/fund"
+              element={
+                <ProtectedRoute>
+                  <CrowdfundingFundRedirect />
+                </ProtectedRoute>
+              }
+            />
 
             <>
               <Route

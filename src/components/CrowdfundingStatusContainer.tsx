@@ -44,7 +44,7 @@ type CrowdfundingStatusContainerProps = {
   isStarted: boolean;
   isRejected: boolean;
   isCompleted: boolean;
-  isUserAssigned: boolean;
+  isUserOwner: boolean;
   isUserTeacher: boolean;
 };
 
@@ -55,7 +55,7 @@ export const CrowdfundingStatusContainer = ({
   isStarted,
   isRejected,
   isCompleted,
-  isUserAssigned,
+  isUserOwner,
   isUserTeacher,
 }: CrowdfundingStatusContainerProps) => {
   const navigate = useNavigate();
@@ -124,9 +124,8 @@ export const CrowdfundingStatusContainer = ({
         {actionHistory.map(
           ({ name, description, isSubmission, isReview, date }) => (
             <div
-              className={`flex flex-col rounded-lg p-2 border-2 ${
-                isSubmission ? "border-slate-200" : "border-dark-blue"
-              }`}
+              className={`flex flex-col rounded-lg p-2 border-2 ${isSubmission ? "border-slate-200" : "border-dark-blue"
+                }`}
             >
               <div className="flex flex-row justify-between items-center gap-4">
                 <div className="flex items-center text-slate-500 text-sm">
@@ -156,7 +155,7 @@ export const CrowdfundingStatusContainer = ({
 
       <ActionHistory />
 
-      {isStarted && !isRejected && !isCompleted && isUserAssigned && (
+      {isStarted && !isRejected && !isCompleted && isUserOwner && (
         <div className="mt-2">
           <ButtonContainer
             onClick={() =>
@@ -168,13 +167,24 @@ export const CrowdfundingStatusContainer = ({
         </div>
       )}
 
+      {isStarted && !isRejected && !isCompleted && !isUserOwner && (
+        <div className="mt-2">
+          <ButtonContainer
+            onClick={() =>
+              navigate(`/organization/${organizationId}/crowdfunding/${taskId}/fund`)
+            }
+          >
+            Fund task
+          </ButtonContainer>
+        </div>
+      )}
+
       {!isStarted && isUserTeacher && (
         <div className="flex w-full h-full justify-center items-center">
           <button
             disabled={disableButtons}
-            className={`${
-              disableButtons ? "opacity-75" : ""
-            } bg-dark-blue py-4 w-72 md:w-full rounded-lg text-white text-lg font-bold`}
+            className={`${disableButtons ? "opacity-75" : ""
+              } bg-dark-blue py-4 w-72 md:w-full rounded-lg text-white text-lg font-bold`}
             onClick={approveStart}
           >
             Approve start
@@ -186,9 +196,8 @@ export const CrowdfundingStatusContainer = ({
         <div className="flex w-full h-full justify-center items-center">
           <button
             disabled={disableButtons}
-            className={`${
-              disableButtons ? "opacity-75" : ""
-            } border-dark-blue border-2 text-dark-blue py-4 w-72 md:w-full rounded-lg text-lg font-bold`}
+            className={`${disableButtons ? "opacity-75" : ""
+              } border-dark-blue border-2 text-dark-blue py-4 w-72 md:w-full rounded-lg text-lg font-bold`}
             onClick={rejectStart}
           >
             Reject start

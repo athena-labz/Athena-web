@@ -21,7 +21,7 @@ type ProfileContainerProps = {
 const ProfileContainer = ({
   email,
   stakeAddress,
-  type,
+  type
 }: ProfileContainerProps) => {
   const [stakeAddressAbbreviated, setStakeAddressAbbreviated] = useState(true);
 
@@ -229,9 +229,14 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
   const [userGroups, setUserGroups] = useState<GroupMembersipListData | null>(
     null
   );
+  const [userBalance, setUserBalance] = useState<BalanceData | null>(null);
 
   const { user } = useUser()!;
-  const { getUserTasks, getUserGroups } = useBackEnd()!;
+  const { getUserTasks, getUserGroups, getBalance } = useBackEnd()!;
+
+  useEffect(() => {
+    updateUserBalance()
+  }, [])
 
   const updateUserTasks = async (page: number) => {
     if (user === null) {
@@ -280,6 +285,27 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
     }
   };
 
+  const updateUserBalance = async () => {
+    if (user === null) {
+      toast.error("Tried to access profile with user signed out");
+      return;
+    }
+
+    setUserBalance(null);
+
+    try {
+      const balance = await getBalance(user.token, organization);
+      setUserBalance(balance);
+    } catch (error: any) {
+      if (error?.response?.data?.detail) {
+        toast.error(`Server error: ${error.response.data.detail}`);
+      } else {
+        console.error(error);
+        toast.error("Server error while trying to get user balance");
+      }
+    }
+  };
+
   return (
     <div className="p-8 w-full h-full inline-block overflow-auto">
       {user === null && (
@@ -296,16 +322,47 @@ const ProfilePage = ({ organization }: ProfilePageProps) => {
             stakeAddress={user.stakeAddress}
           />
 
+          <hr className="mt-2" />
+
           <TasksContainer
             userTasks={userTasks}
             updateUserTasks={updateUserTasks}
           />
+
+          <hr className="mt-2" />
 
           <GroupsContainer
             organizationId={organization}
             userGroups={userGroups}
             updateUserGroups={updateUserGroups}
           />
+
+          <hr className="mt-2" />
+
+          <div className="w-fit flex flex-row justify-between gap-4 bg-white rounded-lg p-8 px-12">
+            {userBalance && (
+              <div className="flex flex-col gap-4">
+                <span className="text-4xl text-slate-600">Balance</span>
+
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col text-slate-500">
+                    <div className="flex flex-row gap-4 justify-between">
+                      <span>Total credit: </span>
+                      <span>{userBalance.owed}</span>
+                    </div>
+                    <div className="flex flex-row gap-4 justify-between">
+                      <span>Credit available: </span>
+                      <span>{userBalance.available}</span>
+                    </div>
+                    <div className="flex flex-row gap-4 justify-between">
+                      <span>Credit escrowed: </span>
+                      <span>{userBalance.escrowed}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

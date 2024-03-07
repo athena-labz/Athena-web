@@ -31,6 +31,7 @@ export type BackEndContext = {
     supervisorPassword: string,
     areas: string[]
   ) => Promise<void>;
+  getBalance: (token: string, organizationId: string) => Promise<BalanceData>;
   getOrganization: (organizationId: string) => Promise<OrganizationData>;
   getOrganizationAreas: (organizationId: string) => Promise<string[]>;
   getOrganizationTasks: (
@@ -115,6 +116,7 @@ export type BackEndContext = {
     page: number,
     count: number
   ) => Promise<TaskActionListData>;
+  fundTask: (token: string, organizationId: string, taskId: string, amount: number) => Promise<void>;
   approveStartTask: (
     token: string,
     organizationId: string,
@@ -285,6 +287,23 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
       }
     );
   };
+
+  const getBalance = async (token: string, organizationId: string) => {
+    const response = await axios.get(`/api/users/me/organization/${organizationId}/balance`,
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      });
+
+    return {
+      owed: response.data.owed,
+      available: response.data.available,
+      escrowed: response.data.escrowed,
+      claimed: response.data.claimed,
+      lastClaimDate: response.data.last_claim_date ? new Date(response.data.last_claim_date) : null,
+    };
+  }
 
   const getOrganization = async (organizationId: string) => {
     const response = await axios.get(`/api/organization/${organizationId}`);
@@ -656,6 +675,25 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     };
   };
 
+  const fundTask = async (
+    token: string,
+    organizationId: string,
+    taskId: string,
+    amount: number
+  ) => {
+    await axios.post(
+      `/api/organization/${organizationId}/task/${taskId}/fund`,
+      { amount: amount },
+      {
+        headers: {
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+
+    return;
+  }
+
   const approveStartTask = async (
     token: string,
     organizationId: string,
@@ -787,6 +825,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         signUp,
         savePaymentAddress,
         createOrganization,
+        getBalance,
         getOrganization,
         getOrganizationAreas,
         getOrganizationTasks,
@@ -804,6 +843,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
         getTaskMembers,
         getTaskOwner,
         getTaskActions,
+        fundTask,
         approveStartTask,
         rejectStartTask,
         submitTask,

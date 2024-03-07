@@ -81,3 +81,11 @@ type StudentReward = {
   email: string;
   rewards: number;
 };
+
+type BalanceData = {
+  owed: number,
+  available: number,
+  escrowed: number,
+  claimed: number,
+  lastClaimDate: Date | null
+}
