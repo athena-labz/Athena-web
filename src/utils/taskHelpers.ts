@@ -1,7 +1,7 @@
 export const taskStatusDisplay = (projectStatus: TaskStatus) => {
   switch (projectStatus) {
     case "Awaiting": {
-      return "Awaiting assignment";
+      return "Awaiting approval";
     }
 
     case "Progress": {
