@@ -558,7 +558,7 @@ export const BackEndProvider = ({ children }: BackEndProviderProps) => {
     deadline: Date
   ) => {
     await axios.post(
-      `/api/organization/${organizationId}/group/task/create`,
+      `/api/organization/${organizationId}/task/create/group`,
       {
         identifier: taskId,
         name: name,
