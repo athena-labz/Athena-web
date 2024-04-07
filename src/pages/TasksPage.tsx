@@ -19,7 +19,7 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
 
   useEffect(() => {
     loadTasks(currentPage);
-  }, []);
+  }, [currentPage]);
 
   const loadTasks = async (page: number) => {
     try {

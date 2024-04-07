@@ -14,7 +14,6 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const backEnd = useBackEnd()!;
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadUsers(currentPage);

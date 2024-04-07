@@ -19,7 +19,7 @@ const CrowdfundingPage = ({ organizationId }: CrowdfundingPageProps) => {
 
   useEffect(() => {
     loadTasks(currentPage);
-  }, []);
+  }, [currentPage]);
 
   const loadTasks = async (page: number) => {
     try {
