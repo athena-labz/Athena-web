@@ -18,7 +18,7 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
 
   useEffect(() => {
     loadUsers(currentPage);
-  }, []);
+  }, [currentPage]);
 
   const loadUsers = async (page: number) => {
     try {
@@ -79,9 +79,8 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
                 onClick={() =>
                   currentPage > 1 ? setCurrentPage(currentPage - 1) : null
                 }
-                className={`${
-                  currentPage === 1 ? "opacity-75" : ""
-                } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
+                className={`${currentPage === 1 ? "opacity-75" : ""
+                  } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
                 src="/assets/left.svg"
               />
             </div>
@@ -95,9 +94,8 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
                     ? setCurrentPage(currentPage + 1)
                     : null
                 }
-                className={`${
-                  currentPage === usersList.maxPage ? "opacity-75" : ""
-                } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
+                className={`${currentPage === usersList.maxPage ? "opacity-75" : ""
+                  } h-16 p-2 rounded-full transition delay-100 hover:bg-slate-200 hover:cursor-pointer`}
                 src="/assets/right.svg"
               />
             </div>

@@ -113,7 +113,7 @@ const CreateTaskPage = ({ organizationId }: CreateTaskPageProps) => {
         organizationId,
         uuidv4(),
         name,
-        [description1, description2, description3, description4].join("\n"),
+        [description1, description2, description3, description4].join("\n\n"),
         rewards,
         addDays(new Date(), daysToCompletion)
       );
