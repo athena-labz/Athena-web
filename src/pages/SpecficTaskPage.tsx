@@ -22,7 +22,11 @@ const TaskContent = ({ name, description, date }: TaskContentProps) => (
       <h1 className="text-3xl text-slate-600 font-semibold">{name}</h1>
       <hr />
       <h1 className="text-2xl text-slate-600 font-semibold">About this task</h1>
-      <span className="text-justify">{description}</span>
+      <div className="flex flex-row">
+        {description.split("\n").map((paragraph) => (
+          <span className="text-justify">{paragraph}</span>
+        ))}
+      </div>
       <hr />
       <div className="flex flex-row justify-between items-center">
         <div className="flex flex-row gap-2 items-center text-slate-500 text-sm">
