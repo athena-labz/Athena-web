@@ -12,7 +12,7 @@ export const UserCard = ({ email, stakeAddress, userType }: UserCardProps) => {
     <div className="inline-block text-slate-600 gap-4 w-72 p-8 bg-white rounded-lg hover:cursor-pointer">
       <div className="flex flex-row justify-start items-center gap-2">
         <Avatar email={email} className="w-8 rounded-full" />
-        <span className="text-lg font-semibold">{email}</span>
+        <span className="text-md font-semibold truncate">{email}</span>
       </div>
       <div className="flex flex-col gap-2 mt-4 mb-4">
         <span className="truncate">{stakeAddress}</span>

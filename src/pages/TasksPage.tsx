@@ -26,7 +26,7 @@ const TasksPage = ({ organizationId }: TasksPageProps) => {
       const taskList = await backEnd.getOrganizationTasks(
         organizationId,
         page,
-        10,
+        9,
         'group'
       );
       setTasksList(taskList);

@@ -24,7 +24,7 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
       const usersList = await backEnd.getOrganizationUsers(
         organizationId,
         page,
-        10
+        9
       );
 
       setUsersList(usersList);
@@ -72,7 +72,7 @@ const UsersPage = ({ organizationId }: UsersPageProps) => {
         </div>
 
         {usersList && usersList.elements.length > 0 && (
-          <div className="flex flex-row justify-center">
+          <div className="flex flex-row justify-center bg-dark-blue p-2 rouded-lg">
             <div className="flex items-center">
               <img
                 onClick={() =>

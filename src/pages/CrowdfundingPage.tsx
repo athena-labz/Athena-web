@@ -26,7 +26,7 @@ const CrowdfundingPage = ({ organizationId }: CrowdfundingPageProps) => {
       const taskList = await backEnd.getOrganizationTasks(
         organizationId,
         page,
-        10,
+        9,
         'individual'
       );
       setTasksList(taskList);
